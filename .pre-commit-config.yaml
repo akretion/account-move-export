@@ -1,4 +1,3 @@
-
 exclude: |
   (?x)
   # NOT INSTALLABLE ADDONS
@@ -49,7 +48,7 @@ repos:
           - --addons-dir=.
           - --branch=16.0
           - --org-name=akretion
-          - --repo-name=https://github.com/akretion/account-move-export 
+          - --repo-name=https://github.com/akretion/account-move-export
           - --if-source-changed
           - --keep-source-digest
   - repo: https://github.com/OCA/odoo-pre-commit-hooks

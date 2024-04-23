@@ -15,6 +15,8 @@
                     <button name="get_moves" type="object" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('filter_type', '!=', 'custom')]}" class="btn-primary" string="Get Journal Entries"/>
                     <button name="draft2done" type="object" states="draft" class="btn-primary" string="Generate File"/>
                     <button name="done2draft" type="object" states="done" confirm="Are you sure you want to go back to draft?" string="Back to Draft"/>
+                    <button name="button_account_move_fullscreen" type="object" string="Journal Entries Fullscreen"
+ />
                     <field name="state" widget="statusbar" />
             </header>
             <sheet>
@@ -31,26 +33,31 @@
                     <field name="journal_ids" widget="many2many_tags" attrs="{'invisible': [('filter_type', '!=', 'custom')]}"/>
                     <field name="target_move" widget="radio" attrs="{'invisible': [('filter_type', '!=', 'custom')]}" />
                     <field name="company_id" groups="base.group_multi_company" />
-                </group>
-                <group name="main-right" string="Export File Configuration">
                     <field name="filter_type" invisible="1" />
-                    <field name="analytic" groups="analytic.group_analytic_accounting"/>
-                    <field name="partner_code_field"/>
-                    <field name="partner_code_option" widget="radio"/>
-                    <field name="partner_code_account_ids" widget="many2many_tags" attrs="{'required': [('partner_code_option', '=', 'accounts')], 'invisible': [('partner_code_option', '!=', 'accounts')]}"/>
-                    <field name="header_line"/>
-                    <field name="file_format" />
-                    <field name="date_format" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
-                    <field name="encoding" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
-                    <field name="delimiter" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
-                    <field name="decimal_separator" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
-                    <field name="quoting" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
-                    <field name="file_extension" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
                     <field name="company_id" invisible="1" />
-                    <field name="attachment_datas" filename="attachment_name" />
-                    <field name="move_count"/>
-                    <field name="attachment_id" invisible="1" />
-                    <field name="attachment_name" invisible="1" />
+                </group>
+                <group name="main-right">
+                    <group name="export_file" string="Export File" colspan="2">
+                        <field name="file_format" />
+                        <field name="attachment_datas" filename="attachment_name" />
+                        <field name="move_count"/>
+                        <field name="attachment_id" invisible="1" />
+                        <field name="attachment_name" invisible="1" />
+
+                    </group>
+                    <group name="export_file_setup" string="Export File Configuration" colspan="2">
+                        <field name="header_line"/>
+                        <field name="analytic" groups="analytic.group_analytic_accounting"/>
+                        <field name="partner_code_field"/>
+                        <field name="partner_code_option" widget="radio"/>
+                        <field name="partner_code_account_ids" widget="many2many_tags" attrs="{'required': [('partner_code_option', '=', 'accounts')], 'invisible': [('partner_code_option', '!=', 'accounts')]}"/>
+                        <field name="date_format" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                        <field name="encoding" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                        <field name="delimiter" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                        <field name="decimal_separator" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                        <field name="quoting" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                        <field name="file_extension" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    </group>
                 </group>
             </group>
             <group name="moves" string="Journal Entries">
@@ -106,8 +113,8 @@
 <menuitem
         id="account_move_export_menu"
         action="account_move_export_action"
-        sequence="120"
-        parent="account.menu_finance_entries_actions"
+        sequence="15"
+        parent="account.menu_finance_entries_accounting_miscellaneous"
     />
 
 

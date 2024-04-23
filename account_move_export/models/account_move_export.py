@@ -86,7 +86,7 @@ class AccountMoveExport(models.Model):
     file_format = fields.Selection([
         ('xlsx_generic', 'Generic XLSX'),
         ('csv_generic', 'Generic CSV'),
-        ], required=True, tracking=True, default='csv_generic',
+        ], required=True, tracking=True, default='xlsx_generic',
         states={"done": [("readonly", True)]},
         )
     header_line = fields.Boolean(default=True, states={"done": [("readonly", True)]})
@@ -418,3 +418,16 @@ class AccountMoveExport(models.Model):
             'state': 'done',
             'attachment_id': attach.id,
             })
+
+    def button_account_move_fullscreen(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id(
+            "account.action_move_journal_line"
+        )
+        action.update(
+            {
+                "domain": [("account_move_export_id", "=", self.id)],
+                "context": self._context,
+            }
+        )
+        return action

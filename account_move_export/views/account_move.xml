@@ -22,5 +22,17 @@
     </field>
 </record>
 
+<record id="view_account_move_filter" model="ir.ui.view">
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_account_move_filter"/>
+    <field name="arch" type="xml">
+        <filter name="date" position="after">
+            <separator/>
+            <filter name="not_exported" string="Not Exported Yet" domain="[('account_move_export_id', '=', False)]"/>
+            <filter name="exported" string="Already Exported" domain="[('account_move_export_id', '!=', False)]"/>
+        </filter>
+    </field>
+</record>
+
 
 </odoo>

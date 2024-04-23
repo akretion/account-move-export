@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Copyright 2024 Akretion France (http://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+
+
+<record id="account_move_export_form" model="ir.ui.view">
+    <field name="model">account.move.export</field>
+    <field name="arch" type="xml">
+        <form>
+            <header>
+                    <button name="get_moves" type="object" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('filter_type', '!=', 'custom')]}" class="btn-primary" string="Get Journal Entries"/>
+                    <button name="draft2done" type="object" states="draft" class="btn-primary" string="Generate File"/>
+                    <button name="done2draft" type="object" states="done" confirm="Are you sure you want to go back to draft?" string="Back to Draft"/>
+                    <field name="state" widget="statusbar" />
+            </header>
+            <sheet>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name"/>
+                    </h1>
+                </div>
+            <group name="main">
+                <group name="main-left" attrs="{'invisible': [('filter_type', '!=', 'custom')]}" string="Filters">
+                    <field name="date_range_id" attrs="{'invisible': [('filter_type', '!=', 'custom')]}"/>
+                    <field name="date_start" attrs="{'invisible': [('filter_type', '!=', 'custom')]}"/>
+                    <field name="date_end" attrs="{'invisible': [('filter_type', '!=', 'custom')]}"/>
+                    <field name="journal_ids" widget="many2many_tags" attrs="{'invisible': [('filter_type', '!=', 'custom')]}"/>
+                    <field name="target_move" widget="radio" attrs="{'invisible': [('filter_type', '!=', 'custom')]}" />
+                    <field name="company_id" groups="base.group_multi_company" />
+                </group>
+                <group name="main-right" string="Export File Configuration">
+                    <field name="filter_type" invisible="1" />
+                    <field name="analytic" groups="analytic.group_analytic_accounting"/>
+                    <field name="partner_code_field"/>
+                    <field name="partner_code_option" widget="radio"/>
+                    <field name="partner_code_account_ids" widget="many2many_tags" attrs="{'required': [('partner_code_option', '=', 'accounts')], 'invisible': [('partner_code_option', '!=', 'accounts')]}"/>
+                    <field name="header_line"/>
+                    <field name="file_format" />
+                    <field name="date_format" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="encoding" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="delimiter" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="decimal_separator" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="quoting" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="file_extension" attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"/>
+                    <field name="company_id" invisible="1" />
+                    <field name="attachment_datas" filename="attachment_name" />
+                    <field name="move_count"/>
+                    <field name="attachment_id" invisible="1" />
+                    <field name="attachment_name" invisible="1" />
+                </group>
+            </group>
+            <group name="moves" string="Journal Entries">
+                    <field name="move_ids" widget="many2many" colspan="2" nolabel="1" context="{'tree_view_ref': 'account.view_move_tree'}"/>
+            </group>
+            </sheet>
+            <div class="oe_chatter">
+                <field name="message_follower_ids" widget="mail_followers" />
+                <field name="activity_ids" widget="mail_activity" />
+                <field name="message_ids" widget="mail_thread" />
+            </div>
+        </form>
+    </field>
+</record>
+
+<record id="account_move_export_tree" model="ir.ui.view">
+    <field name="model">account.move.export</field>
+    <field name="arch" type="xml">
+            <tree>
+                    <field name="name"/>
+                    <field name="create_date" optional="show"/>
+                    <field name="date_start" optional="show"/>
+                    <field name="date_end" optional="show"/>
+                    <field name="file_format" optional="show"/>
+                    <field name="move_count" optional="show"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'done'"/>
+            </tree>
+    </field>
+</record>
+
+<record id="account_move_export_search" model="ir.ui.view">
+    <field name="model">account.move.export</field>
+    <field name="arch" type="xml">
+        <search>
+            <field name="name"/>
+            <filter string="Start Date" name="date_start" date="date_start"/>
+            <group name="groupby">
+                <filter name="create_date_groupby" string="Creation Date" context="{'group_by': 'create_date'}"/>
+                <filter name="file_format_groupby" string="File Format" context="{'group_by': 'file_format'}"/>
+            </group>
+        </search>
+    </field>
+</record>
+
+<record id="account_move_export_action" model="ir.actions.act_window">
+    <field name="name">Journal Entries Exports</field>
+    <field name="res_model">account.move.export</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+
+<menuitem
+        id="account_move_export_menu"
+        action="account_move_export_action"
+        sequence="120"
+        parent="account.menu_finance_entries_actions"
+    />
+
+
+</odoo>

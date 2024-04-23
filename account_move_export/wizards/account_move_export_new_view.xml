@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2024 Akretion France (http://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+
+<odoo>
+
+<record id="account_move_export_new_form" model="ir.ui.view">
+    <field name="model">account.move.export.new</field>
+    <field name="arch" type="xml">
+        <form>
+            <p>This wizard will create a new journal entry export for the selected journal entries.</p>
+            <footer>
+                <button
+                        type="object"
+                        name="run"
+                        string="Create"
+                        class="btn-primary"
+                    />
+                <button special="cancel" string="Cancel" class="oe_link" />
+            </footer>
+        </form>
+    </field>
+</record>
+
+<record id="account_move_export_new_action" model="ir.actions.act_window">
+    <field name="name">Export Journal Entries</field>
+    <field name="res_model">account.move.export.new</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="account.model_account_move" />
+    <field name="binding_view_types">list</field>
+</record>
+
+</odoo>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  Copyright 2024 Akretion France (http://www.akretion.com/)
+  @author: Alexis de Lattre <alexis.delattre@akretion.com>
+  License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+-->
+<odoo>
+
+
+<record id="view_move_form" model="ir.ui.view">
+    <field name="model">account.move</field>
+    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="arch" type="xml">
+        <!-- when move_type != 'entry' -->
+        <group name="accounting_info_group" position="inside">
+            <field name="account_move_export_id"/>
+        </group>
+        <!-- when move_type == 'entry' -->
+        <group name="misc_group" position="inside">
+            <field name="account_move_export_id"/>
+        </group>
+    </field>
+</record>
+
+
+</odoo>

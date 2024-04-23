@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_account_move_export_full,Full access on account.move.export,model_account_move_export,account.group_account_invoice,1,1,1,1
+access_account_move_export_read,Read access on account.move.export to auditor,model_account_move_export,account.group_account_readonly,1,0,0,0
+access_account_move_export_new,Full access on account.move.export.new wizard,model_account_move_export_new,account.group_account_invoice,1,1,1,1

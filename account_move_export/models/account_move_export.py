@@ -381,6 +381,9 @@ class AccountMoveExport(models.Model):
     def get_moves(self):
         self.ensure_one()
         assert self.filter_type == 'custom'
+        previous_moves = self.env["account.move"].search([("account_move_export_id", "=", self.id)])
+        if previous_moves:
+            previous_moves.write({'account_move_export_id': False})
         domain = self._prepare_custom_filter_domain()
         moves = self.env["account.move"].search(domain)
         if not moves:

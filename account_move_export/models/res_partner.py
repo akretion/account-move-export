@@ -11,8 +11,8 @@ class ResPartner(models.Model):
     def _prepare_account_move_export_partner_code(self, export_options):
         self.ensure_one()
         res = None
-        if export_options['partner_code_field'] == 'id':
+        if export_options["partner_code_field"] == "id":
             res = self.id
-        elif export_options['partner_code_field'] == 'ref':
+        elif export_options["partner_code_field"] == "ref":
             res = self.ref or None
         return res

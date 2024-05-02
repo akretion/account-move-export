@@ -12,7 +12,7 @@
     "maintainers": ["alexis-via"],
     "website": "https://github.com/akretion/account-move-export",
     "depends": ["account", "date_range"],
-    "external_dependencies": {"python": ["xlsxwriter"]},
+    "external_dependencies": {"python": ["xlsxwriter", "unidecode"]},
     "data": [
         "security/ir.model.access.csv",
         "security/ir_rule.xml",

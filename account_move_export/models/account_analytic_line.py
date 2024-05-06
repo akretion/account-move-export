@@ -20,12 +20,11 @@ class AccountAnalyticLine(models.Model):
         partner_code = None
         if self.partner_id and (
             (
-                export_options["partner_code_option"]
-                in ("accounts", "receivable_payable")
+                export_options["partner_option"] in ("accounts", "receivable_payable")
                 and self.move_line_id.account_id.id
-                in export_options["partner_code_account_ids"]
+                in export_options["partner_account_ids"]
             )
-            or export_options["partner_code_option"] == "all"
+            or export_options["partner_option"] == "all"
         ):
             partner_code = self.partner_id._prepare_account_move_export_partner_code(
                 export_options

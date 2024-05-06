@@ -98,11 +98,11 @@
                                     groups="analytic.group_analytic_accounting"
                                 />
                         <field name="partner_code_field" />
-                        <field name="partner_code_option" widget="radio" />
+                        <field name="partner_option" widget="radio" />
                         <field
-                                    name="partner_code_account_ids"
+                                    name="partner_account_ids"
                                     widget="many2many_tags"
-                                    attrs="{'required': [('partner_code_option', '=', 'accounts')], 'invisible': [('partner_code_option', '!=', 'accounts')]}"
+                                    attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
                                 />
                         <field
                                     name="date_format"

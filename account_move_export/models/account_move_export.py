@@ -10,8 +10,9 @@ from io import BytesIO, StringIO
 from dateutil.relativedelta import relativedelta
 from unidecode import unidecode
 
-from odoo import _, api, fields, models
-from odoo.exceptions import UserError
+from odoo import Command, _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.misc import format_date
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +54,8 @@ class AccountMoveExport(models.Model):
         string="Journal Entries",
         check_company=True,
         states={"done": [("readonly", True)]},
-        domain="[('account_move_export_id', '=', False), ('company_id', '=', company_id), ('state', '!=', 'cancel')]",  # noqa: E501
+        domain="[('account_move_export_id', '=', False), "
+        "('company_id', '=', company_id), ('state', '!=', 'cancel')]",
     )
     move_count = fields.Integer(
         compute="_compute_move_count", store=True, string="# of Journal Entries"
@@ -132,7 +134,7 @@ class AccountMoveExport(models.Model):
         required=True,
         states={"done": [("readonly", True)]},
     )
-    partner_code_option = fields.Selection(
+    partner_option = fields.Selection(
         [
             ("receivable_payable", "Receivable and Payable Accounts"),
             ("accounts", "Selected Accounts"),
@@ -142,10 +144,10 @@ class AccountMoveExport(models.Model):
         required=True,
         states={"done": [("readonly", True)]},
     )
-    partner_code_account_ids = fields.Many2many(
+    partner_account_ids = fields.Many2many(
         "account.account",
-        string="Accounts with Partner Code",
-        default=lambda self: self._default_partner_code_account_ids(),
+        string="Accounts with Partner",
+        default=lambda self: self._default_partner_account_ids(),
         check_company=True,
         domain="[('company_id', '=', company_id)]",
         states={"done": [("readonly", True)]},
@@ -242,6 +244,19 @@ class AccountMoveExport(models.Model):
         for export in self:
             export.move_count = mapped_data.get(export.id, 0)
 
+    @api.constrains("date_start", "date_end")
+    def _check_dates(self):
+        for rec in self:
+            if rec.date_start and rec.date_end and rec.date_end < rec.date_start:
+                raise ValidationError(
+                    _(
+                        "The end date (%(date_end)s) is before the start date "
+                        "(%(date_start)s).",
+                        date_end=format_date(self.env, rec.date_end),
+                        date_start=format_date(self.env, rec.date_start),
+                    )
+                )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -254,7 +269,7 @@ class AccountMoveExport(models.Model):
         return super().create(vals_list)
 
     @api.model
-    def _default_partner_code_account_ids(self):
+    def _default_partner_account_ids(self):
         receivable_account = self.env["ir.property"]._get(
             "property_account_receivable_id", "res.partner"
         )
@@ -267,7 +282,10 @@ class AccountMoveExport(models.Model):
         self.ensure_one()
         assert self.state == "done"
         self.attachment_id.unlink()
-        self.write({"state": "draft"})
+        vals = {"state": "draft"}
+        if self.filter_type == "custom":
+            vals["move_ids"] = [Command.unlink(move.id) for move in self.move_ids]
+        self.write(vals)
 
     def _prepare_custom_filter_domain(self):
         self.ensure_one()
@@ -331,7 +349,7 @@ class AccountMoveExport(models.Model):
             "date_format": self.date_format,
             "decimal_separator": self.decimal_separator,
             "partner_code_field": self.partner_code_field,
-            "partner_code_option": self.partner_code_option,
+            "partner_option": self.partner_option,
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
@@ -340,18 +358,18 @@ class AccountMoveExport(models.Model):
             "xlsx_analytic_bg_color": "#ff9999",
             "xlsx_font_size": 10,
         }
-        if self.partner_code_option == "accounts":
-            if not self.partner_code_account_ids:
+        if self.partner_option == "accounts":
+            if not self.partner_account_ids:
                 raise UserError(
                     _(
-                        "As you chose 'Selected Accounts' as 'Partner Code Option', you must select one or several accounts for which the partner code will be exported."  # noqa: E501
+                        "As you chose 'Selected Accounts' as 'Partner Option', "
+                        "you must select one or several accounts for which the partner "
+                        "will be exported."
                     )
                 )
-            export_options[
-                "partner_code_account_ids"
-            ] = self.partner_code_account_ids.ids
-        elif self.partner_code_option == "receivable_payable":  # just for perf
-            export_options["partner_code_account_ids"] = (
+            export_options["partner_account_ids"] = self.partner_account_ids.ids
+        elif self.partner_option == "receivable_payable":  # just for perf
+            export_options["partner_account_ids"] = (
                 self.env["account.account"]
                 .search(
                     [
@@ -428,7 +446,7 @@ class AccountMoveExport(models.Model):
             for mline in move.line_ids.filtered(
                 lambda x: x.display_type not in ("line_section", "line_note")
             ):
-                mline_dict = mline._prepare_account_move_export_line(export_options)  # noqa: E501
+                mline_dict = mline._prepare_account_move_export_line(export_options)
                 for field, col in field2col.items():
                     if field in mline_dict:
                         sheet.write(
@@ -505,10 +523,12 @@ class AccountMoveExport(models.Model):
 
     def get_moves(self):
         self.ensure_one()
-        assert self.filter_type == 'custom'
-        previous_moves = self.env["account.move"].search([("account_move_export_id", "=", self.id)])
+        assert self.filter_type == "custom"
+        previous_moves = self.env["account.move"].search(
+            [("account_move_export_id", "=", self.id)]
+        )
         if previous_moves:
-            previous_moves.write({'account_move_export_id': False})
+            previous_moves.write({"account_move_export_id": False})
         domain = self._prepare_custom_filter_domain()
         moves = self.env["account.move"].search(domain)
         if not moves:
@@ -535,7 +555,8 @@ class AccountMoveExport(models.Model):
         if self.quoting == "none" and self.decimal_separator == self.delimiter:
             raise UserError(
                 _(
-                    "When there is no quoting, the field delimiter and the decimal separator must be different."  # noqa: E501
+                    "When there is no quoting, the field delimiter and the decimal "
+                    "separator must be different."
                 )
             )
 

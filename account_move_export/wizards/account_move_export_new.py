@@ -23,8 +23,8 @@ class AccountMoveExport(models.TransientModel):
         if already_exported_moves:
             raise UserError(
                 _(
-                    "%(count)d of the selected journal entries have already been exported: "  # noqa: E501
-                    "%(journal_entries)s.",
+                    "%(count)d of the selected journal entries have already "
+                    "been exported: %(journal_entries)s.",
                     count=len(already_exported_moves),
                     journal_entries=", ".join(
                         [move.display_name for move in already_exported_moves]

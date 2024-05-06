@@ -9,8 +9,11 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     account_move_export_id = fields.Many2one(
-        'account.move.export', string='Export',
-        check_company=True, copy=False, readonly=True,
-        # I decided NOT to track this field, because I think the perf impact will be too high
-        # when generating a big export
-        )
+        "account.move.export",
+        string="Export",
+        check_company=True,
+        copy=False,
+        readonly=True,
+        # I decided NOT to track this field, because I think the perf impact
+        # will be too high when generating a big export
+    )

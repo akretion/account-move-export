@@ -12,23 +12,33 @@ class AccountAnalyticLine(models.Model):
         self.ensure_one()
         move = self.move_line_id.move_id
         if self.amount > 0:
-            credit = export_options['company_currency'].round(self.amount)
+            credit = export_options["company_currency"].round(self.amount)
             debit = 0.0
         else:
             credit = 0.0
-            debit = export_options['company_currency'].round(self.amount * -1)
+            debit = export_options["company_currency"].round(self.amount * -1)
         partner_code = None
-        if self.partner_id and ((export_options['partner_code_option'] in ('accounts', 'receivable_payable') and self.move_line_id.account_id.id in export_options['partner_code_account_ids']) or export_options['partner_code_option'] == 'all'):
-            partner_code = self.partner_id._prepare_account_move_export_partner_code(export_options)
+        if self.partner_id and (
+            (
+                export_options["partner_code_option"]
+                in ("accounts", "receivable_payable")
+                and self.move_line_id.account_id.id
+                in export_options["partner_code_account_ids"]
+            )
+            or export_options["partner_code_option"] == "all"
+        ):
+            partner_code = self.partner_id._prepare_account_move_export_partner_code(
+                export_options
+            )
         res = {
-            'type': 'A',
-            'entry_number': move.name,
-            'date': self.date,
-            'journal_code': self.plan_id.name,
-            'account_code': self.account_id.code or self.account_id.name,
-            'partner_code': partner_code,
-            'item_label': self.name or None,
-            'debit': debit,
-            'credit': credit,
-            }
+            "type": "A",
+            "entry_number": move.name,
+            "date": self.date,
+            "journal_code": self.plan_id.name,
+            "account_code": self.account_id.code or self.account_id.name,
+            "partner_code": partner_code,
+            "item_label": self.name or None,
+            "debit": debit,
+            "credit": credit,
+        }
         return res

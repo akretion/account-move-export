@@ -9,27 +9,35 @@
 
 <record id="view_move_form" model="ir.ui.view">
     <field name="model">account.move</field>
-    <field name="inherit_id" ref="account.view_move_form"/>
+    <field name="inherit_id" ref="account.view_move_form" />
     <field name="arch" type="xml">
         <!-- when move_type != 'entry' -->
         <group name="accounting_info_group" position="inside">
-            <field name="account_move_export_id"/>
+            <field name="account_move_export_id" />
         </group>
         <!-- when move_type == 'entry' -->
         <group name="misc_group" position="inside">
-            <field name="account_move_export_id"/>
+            <field name="account_move_export_id" />
         </group>
     </field>
 </record>
 
 <record id="view_account_move_filter" model="ir.ui.view">
     <field name="model">account.move</field>
-    <field name="inherit_id" ref="account.view_account_move_filter"/>
+    <field name="inherit_id" ref="account.view_account_move_filter" />
     <field name="arch" type="xml">
         <filter name="date" position="after">
-            <separator/>
-            <filter name="not_exported" string="Not Exported Yet" domain="[('account_move_export_id', '=', False)]"/>
-            <filter name="exported" string="Already Exported" domain="[('account_move_export_id', '!=', False)]"/>
+            <separator />
+            <filter
+                    name="not_exported"
+                    string="Not Exported Yet"
+                    domain="[('account_move_export_id', '=', False)]"
+                />
+            <filter
+                    name="exported"
+                    string="Already Exported"
+                    domain="[('account_move_export_id', '!=', False)]"
+                />
         </filter>
     </field>
 </record>

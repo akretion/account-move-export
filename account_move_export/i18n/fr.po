@@ -50,7 +50,7 @@ msgstr "ASCII"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__partner_account_ids
 msgid "Accounts with Partner"
-msgstr "Comptes avec le partenaire"
+msgstr "Comptes avec partenaire"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_needaction
@@ -201,7 +201,7 @@ msgstr "Nom affiché"
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__state__done
 msgid "Done"
-msgstr "Fait"
+msgstr "Terminé"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__state__draft

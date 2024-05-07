@@ -33,6 +33,7 @@ class AccountMoveLine(models.Model):
             "item_label": self.name or None,
             "debit": export_options["company_currency"].round(self.debit),
             "credit": export_options["company_currency"].round(self.credit),
+            "balance": export_options["company_currency"].round(self.balance),
             "entry_ref": move.ref or None,
             "reconcile_ref": self.full_reconcile_id.name or None,
             "due_date": self.date_maturity or None,

@@ -39,5 +39,6 @@ class AccountAnalyticLine(models.Model):
             "item_label": self.name or None,
             "debit": debit,
             "credit": credit,
+            "balance": export_options["company_currency"].round(self.amount * -1),
         }
         return res

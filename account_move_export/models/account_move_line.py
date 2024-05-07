@@ -12,7 +12,7 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         assert self.display_type not in ("line_section", "line_note")
         move = self.move_id
-        partner_code = None
+        partner_code = partner_label = None
         if self.partner_id and (
             (
                 export_options["partner_option"] in ("accounts", "receivable_payable")
@@ -23,13 +23,18 @@ class AccountMoveLine(models.Model):
             partner_code = self.partner_id._prepare_account_move_export_partner_code(
                 export_options
             )
+            partner_label = self.partner_id._prepare_account_move_export_partner_label(
+                export_options
+            )
         res = {
             "type": "G",
             "entry_number": move.name,
             "date": move.date,
             "journal_code": move.journal_id.code,
             "account_code": self.account_id.code,
+            "account_label": self.account_id.name,
             "partner_code": partner_code,
+            "partner_label": partner_label,
             "item_label": self.name or None,
             "debit": export_options["company_currency"].round(self.debit),
             "credit": export_options["company_currency"].round(self.credit),

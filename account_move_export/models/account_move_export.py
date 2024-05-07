@@ -325,22 +325,24 @@ class AccountMoveExport(models.Model):
             "date": {"width": 10, "style": "date", "sequence": 30},
             "journal_code": {"width": 10, "style": "char", "sequence": 40},
             "account_code": {"width": 12, "style": "char", "sequence": 50},
-            "partner_code": {"width": 12, "style": "char", "sequence": 60},
-            "item_label": {"width": 50, "style": "char", "sequence": 70},
-            "debit": {"width": 10, "style": "company_currency", "sequence": 80},
-            "credit": {"width": 10, "style": "company_currency", "sequence": 90},
-            "entry_ref": {"width": 20, "style": "char", "sequence": 100},
-            "reconcile_ref": {"width": 10, "style": "char", "sequence": 110},
-            "due_date": {"width": 10, "style": "date", "sequence": 120},
-            "origin_currency_amount": {"width": 12, "style": "float", "sequence": 130},
-            "origin_currency_code": {"width": 12, "style": "char", "sequence": 140},
+            "account_label": {"width": 30, "style": "char", "sequence": 60},
+            "partner_code": {"width": 12, "style": "char", "sequence": 70},
+            "partner_label": {"width": 30, "style": "char", "sequence": 80},
+            "item_label": {"width": 50, "style": "char", "sequence": 90},
+            "debit": {"width": 10, "style": "company_currency", "sequence": 100},
+            "credit": {"width": 10, "style": "company_currency", "sequence": 110},
+            "entry_ref": {"width": 20, "style": "char", "sequence": 120},
+            "reconcile_ref": {"width": 10, "style": "char", "sequence": 130},
+            "due_date": {"width": 10, "style": "date", "sequence": 140},
+            "origin_currency_amount": {"width": 12, "style": "float", "sequence": 150},
+            "origin_currency_code": {"width": 12, "style": "char", "sequence": 160},
         }
         line_obj = self.env["account.move.line"]
         if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
             cols.update(
                 {
-                    "start_date": {"width": 10, "style": "date", "sequence": 150},
-                    "end_date": {"width": 10, "style": "date", "sequence": 160},
+                    "start_date": {"width": 10, "style": "date", "sequence": 170},
+                    "end_date": {"width": 10, "style": "date", "sequence": 180},
                 }
             )
         return cols

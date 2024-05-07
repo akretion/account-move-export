@@ -16,3 +16,7 @@ class ResPartner(models.Model):
         elif export_options["partner_code_field"] == "ref":
             res = self.ref or None
         return res
+
+    def _prepare_account_move_export_partner_label(self, export_options):
+        self.ensure_one()
+        return self.name

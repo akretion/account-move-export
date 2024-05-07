@@ -268,6 +268,18 @@ class AccountMoveExport(models.Model):
                 ) or _("New")
         return super().create(vals_list)
 
+    def unlink(self):
+        for rec in self:
+            if rec.state == "done":
+                raise UserError(
+                    _(
+                        "Cannot delete '%(export)s' because it is in 'done' state. "
+                        "You should set it back to draft first.",
+                        export=rec.display_name,
+                    )
+                )
+        return super().unlink()
+
     @api.model
     def _default_partner_account_ids(self):
         receivable_account = self.env["ir.property"]._get(

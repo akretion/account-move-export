@@ -602,3 +602,19 @@ class AccountMoveExport(models.Model):
             }
         )
         return action
+
+    def button_account_move_line_fullscreen(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id(
+            "account.action_account_moves_all"
+        )
+        action.update(
+            {
+                "domain": [
+                    ("move_id.account_move_export_id", "=", self.id),
+                    ("display_type", "not in", ("line_section", "line_note")),
+                ],
+                "context": self._context,
+            }
+        )
+        return action

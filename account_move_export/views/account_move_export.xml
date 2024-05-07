@@ -38,6 +38,11 @@
                         type="object"
                         string="Journal Entries Fullscreen"
                     />
+                    <button
+                        name="button_account_move_line_fullscreen"
+                        type="object"
+                        string="Journal Items Fullscreen"
+                    />
                     <field name="state" widget="statusbar" />
             </header>
             <sheet>

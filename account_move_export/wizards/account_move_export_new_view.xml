@@ -29,4 +29,14 @@
     <field name="binding_view_types">list</field>
 </record>
 
+<record id="account_move_export_new_from_lines_action" model="ir.actions.act_window">
+    <field name="name">Export Journal Entries</field>
+    <field name="res_model">account.move.export.new</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="account.model_account_move_line" />
+    <field name="binding_view_types">list</field>
+</record>
+
+
 </odoo>

@@ -13,10 +13,18 @@ class AccountMoveExport(models.TransientModel):
     @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
-        assert self._context.get("active_model") == "account.move"
+        if self._context.get("active_model") == "account.move":
+            move_ids = self._context.get("active_ids")
+        elif self._context.get("active_model") == "account.move.line":
+            move_lines = self.env["account.move.line"].browse(
+                self._context.get("active_ids")
+            )
+            move_ids = move_lines.move_id.ids
+        else:
+            raise
         already_exported_moves = self.env["account.move"].search(
             [
-                ("id", "in", self._context.get("active_ids")),
+                ("id", "in", move_ids),
                 ("account_move_export_id", "!=", False),
             ]
         )
@@ -35,11 +43,15 @@ class AccountMoveExport(models.TransientModel):
 
     def run(self):
         self.ensure_one()
-        assert self._context.get("active_model") == "account.move"
-        initial_move_ids = self._context.get("active_ids")
-        moves = self.env["account.move"].search(
-            [("id", "in", initial_move_ids), ("account_move_export_id", "=", False)]
-        )
+        if self._context.get("active_model") == "account.move":
+            default_move_ids = self._context.get("active_ids")
+        elif self._context.get("active_model") == "account.move.line":
+            initial_move_lines = self.env["account.move.line"].browse(
+                self._context.get("active_ids")
+            )
+            default_move_ids = initial_move_lines.move_id.ids
+        else:
+            raise
         action = self.env["ir.actions.actions"]._for_xml_id(
             "account_move_export.account_move_export_action"
         )
@@ -50,7 +62,7 @@ class AccountMoveExport(models.TransientModel):
                 "context": dict(
                     self._context,
                     default_filter_type="selected",
-                    default_move_ids=moves.ids,
+                    default_move_ids=default_move_ids,
                 ),
             }
         )

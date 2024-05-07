@@ -10,7 +10,7 @@ from io import BytesIO, StringIO
 from dateutil.relativedelta import relativedelta
 from unidecode import unidecode
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date
 
@@ -249,7 +249,7 @@ class AccountMoveExport(models.Model):
             export.move_line_count = self.env["account.move.line"].search_count(
                 [
                     ("move_id.account_move_export_id", "=", export.id),
-                    ("display_type", "not in", ("line_section", "line_note")),
+                    ("display_type", "=", False),
                 ]
             )
 
@@ -305,7 +305,7 @@ class AccountMoveExport(models.Model):
         self.attachment_id.unlink()
         vals = {"state": "draft"}
         if self.filter_type == "custom":
-            vals["move_ids"] = [Command.unlink(move.id) for move in self.move_ids]
+            vals["move_ids"] = [(3, move.id) for move in self.move_ids]
         self.write(vals)
 
     def _prepare_custom_filter_domain(self):
@@ -329,7 +329,6 @@ class AccountMoveExport(models.Model):
     def _prepare_columns(self):
         # inherit this method to change the order of columns
         cols = {
-            "type": {"width": 4, "style": "char", "sequence": 10},
             "entry_number": {"width": 14, "style": "char", "sequence": 20},
             "date": {"width": 10, "style": "date", "sequence": 30},
             "journal_code": {"width": 10, "style": "char", "sequence": 40},
@@ -346,6 +345,21 @@ class AccountMoveExport(models.Model):
             "origin_currency_amount": {"width": 12, "style": "float", "sequence": 150},
             "origin_currency_code": {"width": 12, "style": "char", "sequence": 160},
         }
+        if self.analytic:
+            cols.update(
+                {
+                    "analytic_account_code": {
+                        "width": 12,
+                        "style": "char",
+                        "sequence": 63,
+                    },
+                    "analytic_account_label": {
+                        "width": 30,
+                        "style": "char",
+                        "sequence": 65,
+                    },
+                }
+            )
         line_obj = self.env["account.move.line"]
         if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
             cols.update(
@@ -386,7 +400,6 @@ class AccountMoveExport(models.Model):
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
             "analytic": self.analytic,
             "cols": self._prepare_columns(),
-            "xlsx_analytic_bg_color": "#ff9999",
             "xlsx_font_size": 10,
         }
         if self.partner_option == "accounts":
@@ -406,9 +419,12 @@ class AccountMoveExport(models.Model):
                     [
                         ("company_id", "=", self.company_id.id),
                         (
-                            "account_type",
+                            "user_type_id",
                             "in",
-                            ("asset_receivable", "liability_payable"),
+                            (
+                                self.env.ref("account.data_account_type_receivable").id,
+                                self.env.ref("account.data_account_type_payable").id,
+                            ),
                         ),
                     ]
                 )
@@ -418,7 +434,6 @@ class AccountMoveExport(models.Model):
 
     def _xlsx_prepare_styles(self, workbook, export_options):
         font_size = export_options["xlsx_font_size"]
-        ana_bg_color = export_options["xlsx_analytic_bg_color"]
         company_currency_format = f"# ### ##0.00 {self.company_id.currency_id.symbol}"
         float_format = "# ### ##0.00"
         date_format = "dd/mm/yyyy"
@@ -439,15 +454,9 @@ class AccountMoveExport(models.Model):
                 }
             ),
             "date": workbook.add_format(date_style),
-            "ana_date": workbook.add_format(dict(date_style, bg_color=ana_bg_color)),
             "company_currency": workbook.add_format(company_currency_style),
-            "ana_company_currency": workbook.add_format(
-                dict(company_currency_style, bg_color=ana_bg_color)
-            ),
             "float": workbook.add_format(float_style),
-            "ana_float": workbook.add_format(dict(float_style, bg_color=ana_bg_color)),
             "char": workbook.add_format(char_style),
-            "ana_char": workbook.add_format(dict(char_style, bg_color=ana_bg_color)),
         }
         return styles
 
@@ -474,9 +483,7 @@ class AccountMoveExport(models.Model):
                 sheet.write(line, col, field, styles["header"])
             line += 1
         for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
+            for mline in move.line_ids.filtered(lambda x: not x.display_type):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 for field, col in field2col.items():
                     if field in mline_dict:
@@ -487,20 +494,6 @@ class AccountMoveExport(models.Model):
                             styles[cols[field]["style"]],
                         )
                 line += 1
-                if export_options["analytic"]:
-                    for aline in mline.analytic_line_ids:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
-                        )
-                        for field, col in field2col.items():
-                            if field in aline_dict:
-                                sheet.write(
-                                    line,
-                                    col,
-                                    aline_dict[field],
-                                    styles[f"ana_{cols[field]['style']}"],
-                                )
-                        line += 1
 
         workbook.close()
         out_file.seek(0)
@@ -527,19 +520,10 @@ class AccountMoveExport(models.Model):
         if self.header_line:
             w.writeheader()
         for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
+            for mline in move.line_ids.filtered(lambda x: not x.display_type):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(mline_dict)
-                if export_options["analytic"]:
-                    for aline in mline.analytic_line_ids:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
-                        )
-                        self._csv_postprocess_line(aline_dict, export_options)
-                        w.writerow(aline_dict)
         return self._csv_encode(tmpfile)
 
     def _csv_encode(self, tmpfile):
@@ -631,7 +615,7 @@ class AccountMoveExport(models.Model):
             {
                 "domain": [
                     ("move_id.account_move_export_id", "=", self.id),
-                    ("display_type", "not in", ("line_section", "line_note")),
+                    ("display_type", "=", False),
                 ],
                 "context": self._context,
             }

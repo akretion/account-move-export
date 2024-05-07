@@ -10,7 +10,7 @@ class AccountMoveLine(models.Model):
 
     def _prepare_account_move_export_line(self, export_options):
         self.ensure_one()
-        assert self.display_type not in ("line_section", "line_note")
+        assert not self.display_type
         move = self.move_id
         partner_code = partner_label = None
         if self.partner_id and (
@@ -27,7 +27,6 @@ class AccountMoveLine(models.Model):
                 export_options
             )
         res = {
-            "type": "G",
             "entry_number": move.name,
             "date": move.date,
             "journal_code": move.journal_id.code,
@@ -45,6 +44,21 @@ class AccountMoveLine(models.Model):
             "origin_currency_amount": self.currency_id.round(self.amount_currency),
             "origin_currency_code": self.currency_id.name,
         }
+        if export_options["analytic"]:
+            if self.analytic_account_id:
+                res.update(
+                    {
+                        "analytic_account_code": self.analytic_account_id.code or None,
+                        "analytic_account_label": self.analytic_account_id.name,
+                    }
+                )
+            else:
+                res.update(
+                    {
+                        "analytic_account_code": None,
+                        "analytic_account_label": None,
+                    }
+                )
         if hasattr(self, "start_date") and hasattr(self, "end_date"):
             res.update(
                 {

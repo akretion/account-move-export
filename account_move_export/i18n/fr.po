@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-06 08:37+0000\n"
-"PO-Revision-Date: 2024-05-06 08:38+0000\n"
+"POT-Creation-Date: 2024-05-07 16:12+0000\n"
+"PO-Revision-Date: 2024-05-07 16:12+0000\n"
 "Last-Translator: Alexis de Lattre <alexis.delattre@akretion.com>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -20,6 +20,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__move_count
 msgid "# of Journal Entries"
 msgstr "Nb de pièces comptables"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__move_line_count
+msgid "# of Journal Items"
+msgstr "Nb d'écritures comptables"
 
 #. module: account_move_export
 #. odoo-python
@@ -136,6 +141,17 @@ msgid "Cancel"
 msgstr "Annuler"
 
 #. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid ""
+"Cannot delete '%(export)s' because it is in 'done' state. You should set it "
+"back to draft first."
+msgstr ""
+"Impossible de supprimer '%(export)s' parce qu'il est à l'état 'Terminé'. "
+"Vous devez d'abord le remettre en brouillon."
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__company_id
 msgid "Company"
 msgstr "Société"
@@ -243,6 +259,7 @@ msgstr "Configuration du fichier d'export"
 
 #. module: account_move_export
 #: model:ir.actions.act_window,name:account_move_export.account_move_export_new_action
+#: model:ir.actions.act_window,name:account_move_export.account_move_export_new_from_lines_action
 msgid "Export Journal Entries"
 msgstr "Exporter les pièces comptables"
 
@@ -394,6 +411,16 @@ msgstr "Pièce comptable"
 #: model:ir.model,name:account_move_export.model_account_move_line
 msgid "Journal Item"
 msgstr "Écriture comptable"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Journal Items"
+msgstr "Écritures comptables"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Journal Items Fullscreen"
+msgstr "Écritures comptables en plein écran"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids

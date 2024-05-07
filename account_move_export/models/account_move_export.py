@@ -58,7 +58,10 @@ class AccountMoveExport(models.Model):
         "('company_id', '=', company_id), ('state', '!=', 'cancel')]",
     )
     move_count = fields.Integer(
-        compute="_compute_move_count", store=True, string="# of Journal Entries"
+        compute="_compute_counts", store=True, string="# of Journal Entries"
+    )
+    move_line_count = fields.Integer(
+        compute="_compute_counts", store=True, string="# of Journal Items"
     )
     date_range_id = fields.Many2one(
         "date.range",
@@ -229,20 +232,26 @@ class AccountMoveExport(models.Model):
                 export.date_end = export.date_range_id.date_end
 
     @api.depends("move_ids")
-    def _compute_move_count(self):
-        rg_res = self.env["account.move"].read_group(
+    def _compute_counts(self):
+        rg_move_res = self.env["account.move"].read_group(
             [("account_move_export_id", "in", self.ids)],
             ["account_move_export_id"],
             ["account_move_export_id"],
         )
-        mapped_data = dict(
+        move_data = dict(
             [
                 (x["account_move_export_id"][0], x["account_move_export_id_count"])
-                for x in rg_res
+                for x in rg_move_res
             ]
         )
         for export in self:
-            export.move_count = mapped_data.get(export.id, 0)
+            export.move_count = move_data.get(export.id, 0)
+            export.move_line_count = self.env["account.move.line"].search_count(
+                [
+                    ("move_id.account_move_export_id", "=", export.id),
+                    ("display_type", "not in", ("line_section", "line_note")),
+                ]
+            )
 
     @api.constrains("date_start", "date_end")
     def _check_dates(self):

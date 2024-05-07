@@ -33,19 +33,36 @@
                         confirm="Are you sure you want to go back to draft?"
                         string="Back to Draft"
                     />
-                    <button
-                        name="button_account_move_fullscreen"
-                        type="object"
-                        string="Journal Entries Fullscreen"
-                    />
-                    <button
-                        name="button_account_move_line_fullscreen"
-                        type="object"
-                        string="Journal Items Fullscreen"
-                    />
                     <field name="state" widget="statusbar" />
             </header>
             <sheet>
+                <div class="oe_button_box" name="button_box">
+                    <button
+                            class="oe_stat_button"
+                            name="button_account_move_fullscreen"
+                            type="object"
+                            help="Show journal entries fullscreen"
+                            icon="fa-building-o"
+                        >
+                        <field
+                                name="move_count"
+                                widget="statinfo"
+                                string="Journal Entries"
+                            />
+                    </button>
+                    <button
+                            name="button_account_move_line_fullscreen"
+                            type="object"
+                            help="Show journal items fullscreen"
+                            icon="fa-bars"
+                        >
+                        <field
+                                name="move_line_count"
+                                widget="statinfo"
+                                string="Journal Items"
+                            />
+                    </button>
+                </div>
                 <div class="oe_title">
                     <h1>
                         <field name="name" />
@@ -87,7 +104,6 @@
                     <group name="export_file" string="Export File" colspan="2">
                         <field name="file_format" />
                         <field name="attachment_datas" filename="attachment_name" />
-                        <field name="move_count" />
                         <field name="attachment_id" invisible="1" />
                         <field name="attachment_name" invisible="1" />
 

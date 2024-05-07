@@ -332,9 +332,17 @@ class AccountMoveExport(models.Model):
             "entry_ref": {"width": 20, "style": "char", "sequence": 100},
             "reconcile_ref": {"width": 10, "style": "char", "sequence": 110},
             "due_date": {"width": 10, "style": "date", "sequence": 120},
-            "currency_amount": {"width": 12, "style": "float", "sequence": 130},
-            "currency_code": {"width": 12, "style": "char", "sequence": 140},
+            "origin_currency_amount": {"width": 12, "style": "float", "sequence": 130},
+            "origin_currency_code": {"width": 12, "style": "char", "sequence": 140},
         }
+        line_obj = self.env["account.move.line"]
+        if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
+            cols.update(
+                {
+                    "start_date": {"width": 10, "style": "date", "sequence": 150},
+                    "end_date": {"width": 10, "style": "date", "sequence": 160},
+                }
+            )
         return cols
 
     def _csv_format_amount(self, amount, export_options):

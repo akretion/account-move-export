@@ -10,6 +10,7 @@ class AccountMoveLine(models.Model):
 
     def _prepare_account_move_export_line(self, export_options):
         self.ensure_one()
+        assert self.display_type not in ("line_section", "line_note")
         move = self.move_id
         partner_code = None
         if self.partner_id and (
@@ -22,9 +23,6 @@ class AccountMoveLine(models.Model):
             partner_code = self.partner_id._prepare_account_move_export_partner_code(
                 export_options
             )
-        secondary_currency = (
-            self.currency_id.id != export_options["company_currency_id"]
-        )
         res = {
             "type": "G",
             "entry_number": move.name,
@@ -38,9 +36,14 @@ class AccountMoveLine(models.Model):
             "entry_ref": move.ref or None,
             "reconcile_ref": self.full_reconcile_id.name or None,
             "due_date": self.date_maturity or None,
-            "currency_amount": secondary_currency
-            and self.currency_id.round(self.amount_currency)
-            or None,
-            "currency_code": secondary_currency and self.currency_id.name or None,
+            "origin_currency_amount": self.currency_id.round(self.amount_currency),
+            "origin_currency_code": self.currency_id.name,
         }
+        if hasattr(self, "start_date") and hasattr(self, "end_date"):
+            res.update(
+                {
+                    "start_date": self.start_date or None,
+                    "end_date": self.end_date or None,
+                }
+            )
         return res

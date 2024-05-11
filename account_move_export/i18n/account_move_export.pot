@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-07 16:12+0000\n"
-"PO-Revision-Date: 2024-05-07 16:12+0000\n"
+"POT-Creation-Date: 2024-05-11 19:13+0000\n"
+"PO-Revision-Date: 2024-05-11 19:13+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -98,6 +98,11 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_analytic_line
 msgid "Analytic Line"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__analytic_plan_ids
+msgid "Analytic Plans to Export"
 msgstr ""
 
 #. module: account_move_export
@@ -363,7 +368,7 @@ msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__analytic
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__analytic_option
 msgid "Include Analytic"
 msgstr ""
 
@@ -390,11 +395,6 @@ msgid "Journal Entries Exports"
 msgstr ""
 
 #. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Journal Entries Fullscreen"
-msgstr ""
-
-#. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move
 msgid "Journal Entry"
 msgstr ""
@@ -407,11 +407,6 @@ msgstr ""
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
 msgid "Journal Items"
-msgstr ""
-
-#. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Journal Items Fullscreen"
 msgstr ""
 
 #. module: account_move_export
@@ -498,6 +493,11 @@ msgid "Next Activity Type"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__analytic_option__no
+msgid "No"
+msgstr ""
+
+#. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
@@ -572,6 +572,16 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_option__accounts
 msgid "Selected Accounts"
+msgstr ""
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Show journal entries fullscreen"
+msgstr ""
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Show journal items fullscreen"
 msgstr ""
 
 #. module: account_move_export
@@ -652,6 +662,16 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move_export_new
 msgid "Wizard to create an export from selected journal entries"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__analytic_option__all
+msgid "Yes, all plans"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__analytic_option__plan_filter
+msgid "Yes, but only selected plans"
 msgstr ""
 
 #. module: account_move_export

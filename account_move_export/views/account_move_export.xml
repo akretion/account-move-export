@@ -115,8 +115,15 @@
                             >
                         <field name="header_line" />
                         <field
-                                    name="analytic"
+                                    name="analytic_option"
                                     groups="analytic.group_analytic_accounting"
+                                    widget="radio"
+                                />
+                        <field
+                                    name="analytic_plan_ids"
+                                    groups="analytic.group_analytic_accounting"
+                                    widget="many2many_tags"
+                                    attrs="{'invisible': [('analytic_option', '!=', 'plan_filter')], 'required': [('analytic_option', '=', 'plan_filter')]}"
                                 />
                         <field name="partner_code_field" />
                         <field name="partner_option" widget="radio" />

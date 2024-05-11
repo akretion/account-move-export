@@ -66,7 +66,7 @@ class AccountMoveExport(models.Model):
     date_range_id = fields.Many2one(
         "date.range",
         check_company=True,
-        domain="['|', ('company_id', '=', company_id), " "('company_id', '=', False)]",
+        domain="[('company_id', 'in', (company_id, False))]",
         states={"done": [("readonly", True)]},
     )
     date_start = fields.Date(
@@ -152,7 +152,7 @@ class AccountMoveExport(models.Model):
         string="Accounts with Partner",
         default=lambda self: self._default_partner_account_ids(),
         check_company=True,
-        domain="[('company_id', '=', company_id)]",
+        domain="[('company_id', 'in', (company_id, False))]",
         states={"done": [("readonly", True)]},
     )
     encoding = fields.Selection(
@@ -205,8 +205,22 @@ class AccountMoveExport(models.Model):
         required=True,
         states={"done": [("readonly", True)]},
     )
-    analytic = fields.Boolean(
-        string="Include Analytic", states={"done": [("readonly", True)]}
+    analytic_option = fields.Selection(
+        [
+            ("no", "No"),
+            ("all", "Yes, all plans"),
+            ("plan_filter", "Yes, but only selected plans"),
+        ],
+        string="Include Analytic",
+        states={"done": [("readonly", True)]},
+        default="no",
+    )
+    analytic_plan_ids = fields.Many2many(
+        "account.analytic.plan",
+        check_company=True,
+        string="Analytic Plans to Export",
+        domain="[('company_id', '=', company_id)]",
+        states={"done": [("readonly", True)]},
     )
     attachment_id = fields.Many2one("ir.attachment", readonly=True)
     attachment_datas = fields.Binary(
@@ -384,11 +398,13 @@ class AccountMoveExport(models.Model):
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
-            "analytic": self.analytic,
+            "analytic_option": self.analytic_option,
             "cols": self._prepare_columns(),
             "xlsx_analytic_bg_color": "#ff9999",
             "xlsx_font_size": 10,
         }
+        if self.analytic_option == "plan_filter":
+            export_options["analytic_plan_ids"] = self.analytic_plan_ids.ids
         if self.partner_option == "accounts":
             if not self.partner_account_ids:
                 raise UserError(
@@ -487,8 +503,14 @@ class AccountMoveExport(models.Model):
                             styles[cols[field]["style"]],
                         )
                 line += 1
-                if export_options["analytic"]:
-                    for aline in mline.analytic_line_ids:
+                if export_options["analytic_option"] == "all":
+                    alines = mline.analytic_line_ids
+                elif export_options["analytic_option"] == "plan_filter":
+                    alines = mline.analytic_line_ids.filtered(
+                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
+                    )
+                if export_options["analytic_option"] in ("all", "plan_filter"):
+                    for aline in alines:
                         aline_dict = aline._prepare_account_move_export_line(
                             export_options
                         )
@@ -533,8 +555,14 @@ class AccountMoveExport(models.Model):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(mline_dict)
-                if export_options["analytic"]:
-                    for aline in mline.analytic_line_ids:
+                if export_options["analytic_option"] == "all":
+                    alines = mline.analytic_line_ids
+                elif export_options["analytic_option"] == "plan_filter":
+                    alines = mline.analytic_line_ids.filtered(
+                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
+                    )
+                if export_options["analytic_option"] in ("all", "plan_filter"):
+                    for aline in alines:
                         aline_dict = aline._prepare_account_move_export_line(
                             export_options
                         )

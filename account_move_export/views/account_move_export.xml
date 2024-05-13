@@ -182,12 +182,14 @@
     <field name="model">account.move.export</field>
     <field name="arch" type="xml">
             <tree>
-                    <field name="name" />
+                    <field name="name" decoration-bf="1" />
                     <field name="create_date" optional="show" />
                     <field name="date_start" optional="show" />
                     <field name="date_end" optional="show" />
+                    <field name="target_move" optional="hide" />
                     <field name="file_format" optional="show" />
-                    <field name="move_count" optional="show" />
+                    <field name="partner_option" optional="hide" />
+                    <field name="analytic_option" optional="hide" />
                     <field
                     name="company_id"
                     groups="base.group_multi_company"
@@ -208,7 +210,13 @@
     <field name="arch" type="xml">
         <search>
             <field name="name" />
+            <separator />
             <filter string="Start Date" name="date_start" date="date_start" />
+            <separator />
+            <filter string="End Date" name="date_end" date="date_end" />
+            <separator />
+            <filter name="draft" domain="[('state', '=', 'draft')]" string="Draft" />
+            <filter name="done" domain="[('state', '=', 'done')]" string="Done" />
             <group name="groupby">
                 <filter
                         name="create_date_groupby"

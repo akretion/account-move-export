@@ -113,7 +113,10 @@
                                 string="Export File Configuration"
                                 colspan="2"
                             >
-                        <field name="header_line" />
+                        <field
+                                    name="header_line"
+                                    attrs="{'invisible': [('file_format', 'not in', ('csv_generic', 'xlsx_generic'))]}"
+                                />
                         <field
                                     name="analytic_option"
                                     groups="analytic.group_analytic_accounting"

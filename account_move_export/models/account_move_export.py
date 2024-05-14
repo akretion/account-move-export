@@ -380,14 +380,20 @@ class AccountMoveExport(models.Model):
         return res
 
     def _csv_postprocess_line(self, ldict, export_options):
-        for field in ldict.keys():
-            if export_options["cols"][field]["style"] == "date" and ldict.get(field):
-                ldict[field] = ldict[field].strftime(export_options["date_format"])
-            elif (
-                export_options["cols"][field]["style"] in ("company_currency", "float")
-                and field in ldict
-            ):
-                ldict[field] = self._csv_format_amount(ldict[field], export_options)
+        row = {}
+        for col_name, col_prop in export_options["cols"].items():
+            if col_name in ldict:
+                if col_prop["style"] == "date" and ldict[col_name]:
+                    row[col_name] = ldict[col_name].strftime(
+                        export_options["date_format"]
+                    )
+                elif col_prop["style"] in ("company_currency", "float"):
+                    row[col_name] = self._csv_format_amount(
+                        ldict[col_name], export_options
+                    )
+                else:
+                    row[col_name] = ldict[col_name]
+        return row
 
     def _prepare_export_options(self):
         export_options = {
@@ -553,8 +559,8 @@ class AccountMoveExport(models.Model):
                 lambda x: x.display_type not in ("line_section", "line_note")
             ):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
-                self._csv_postprocess_line(mline_dict, export_options)
-                w.writerow(mline_dict)
+                row = self._csv_postprocess_line(mline_dict, export_options)
+                w.writerow(row)
                 if export_options["analytic_option"] == "all":
                     alines = mline.analytic_line_ids
                 elif export_options["analytic_option"] == "plan_filter":

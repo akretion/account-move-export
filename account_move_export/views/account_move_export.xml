@@ -102,63 +102,11 @@
                 </group>
                 <group name="main-right">
                     <group name="export_file" string="Export File" colspan="2">
-                        <field name="file_format" />
+                        <field name="config_id" />
                         <field name="attachment_datas" filename="attachment_name" />
                         <field name="attachment_id" invisible="1" />
                         <field name="attachment_name" invisible="1" />
 
-                    </group>
-                    <group
-                                name="export_file_setup"
-                                string="Export File Configuration"
-                                colspan="2"
-                            >
-                        <field
-                                    name="header_line"
-                                    attrs="{'invisible': [('file_format', 'not in', ('csv_generic', 'xlsx_generic'))]}"
-                                />
-                        <field
-                                    name="analytic_option"
-                                    groups="analytic.group_analytic_accounting"
-                                    widget="radio"
-                                />
-                        <field
-                                    name="analytic_plan_ids"
-                                    groups="analytic.group_analytic_accounting"
-                                    widget="many2many_tags"
-                                    attrs="{'invisible': [('analytic_option', '!=', 'plan_filter')], 'required': [('analytic_option', '=', 'plan_filter')]}"
-                                />
-                        <field name="partner_code_field" />
-                        <field name="partner_option" widget="radio" />
-                        <field
-                                    name="partner_account_ids"
-                                    widget="many2many_tags"
-                                    attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
-                                />
-                        <field
-                                    name="date_format"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
-                        <field
-                                    name="encoding"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
-                        <field
-                                    name="delimiter"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
-                        <field
-                                    name="decimal_separator"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
-                        <field
-                                    name="quoting"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
-                        <field
-                                    name="file_extension"
-                                    attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                                />
                     </group>
                 </group>
             </group>
@@ -190,9 +138,7 @@
                     <field name="date_start" optional="show" />
                     <field name="date_end" optional="show" />
                     <field name="target_move" optional="hide" />
-                    <field name="file_format" optional="show" />
-                    <field name="partner_option" optional="hide" />
-                    <field name="analytic_option" optional="hide" />
+                    <field name="config_id" optional="show" />
                     <field
                     name="company_id"
                     groups="base.group_multi_company"
@@ -227,9 +173,9 @@
                         context="{'group_by': 'create_date'}"
                     />
                 <filter
-                        name="file_format_groupby"
-                        string="File Format"
-                        context="{'group_by': 'file_format'}"
+                        name="config_groupby"
+                        string="Configuration"
+                        context="{'group_by': 'config_id'}"
                     />
             </group>
         </search>

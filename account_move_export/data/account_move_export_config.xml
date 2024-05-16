@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+
+<record id="account_move_export_default_config" model="account.move.export.config">
+	<field name="name">Default Export Configuration</field>
+	<field
+            name="column_ids"
+            eval="[(0, 0, {'field': 'type', 'sequence': 10}), (0, 0, {'field': 'entry_number', 'sequence': 20}), (0, 0, {'field': 'date', 'sequence': 30}), (0, 0, {'field': 'journal_code', 'sequence': 40}), (0, 0, {'field': 'account_code', 'sequence': 50}), (0, 0, {'field': 'account_label', 'sequence': 60}), (0, 0, {'field': 'partner_code', 'sequence': 70}), (0, 0, {'field': 'partner_label', 'sequence': 80}), (0, 0, {'field': 'item_label', 'sequence': 90}), (0, 0, {'field': 'debit', 'sequence': 100}), (0, 0, {'field': 'credit', 'sequence': 110}), (0, 0, {'field': 'entry_ref', 'sequence': 120}), (0, 0, {'field': 'reconcile_ref', 'sequence': 130}), (0, 0, {'field': 'due_date', 'sequence': 140}), (0, 0, {'field': 'origin_currency_amount', 'sequence': 150}), (0, 0, {'field': 'origin_currency_code', 'sequence': 160})]"
+        />
+</record>
+
+</odoo>

@@ -12,4 +12,11 @@
     <field name="domain_force">[('company_id', 'in', company_ids)]</field>
 </record>
 
+<record id="account_move_export_config_rule" model="ir.rule">
+    <field name="name">Journal entry export configuration multi-company</field>
+    <field name="model_id" ref="model_account_move_export_config" />
+    <field name="domain_force">[('company_id', 'in', company_ids + [False])]</field>
+</record>
+
+
 </odoo>

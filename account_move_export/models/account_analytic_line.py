@@ -17,7 +17,7 @@ class AccountAnalyticLine(models.Model):
         else:
             credit = 0.0
             debit = export_options["company_currency"].round(self.amount * -1)
-        partner_code = partner_label = None
+        partner_code = partner_name = None
         if self.partner_id and (
             (
                 export_options["partner_option"] in ("accounts", "receivable_payable")
@@ -29,7 +29,7 @@ class AccountAnalyticLine(models.Model):
             partner_code = self.partner_id._prepare_account_move_export_partner_code(
                 export_options
             )
-            partner_label = self.partner_id._prepare_account_move_export_partner_label(
+            partner_name = self.partner_id._prepare_account_move_export_partner_name(
                 export_options
             )
         res = {
@@ -38,9 +38,9 @@ class AccountAnalyticLine(models.Model):
             "date": self.date,
             "journal_code": self.plan_id.name,
             "account_code": self.account_id.code or self.account_id.name,
-            "account_label": self.account_id.name,
+            "account_name": self.account_id.name,
             "partner_code": partner_code,
-            "partner_label": partner_label,
+            "partner_name": partner_name,
             "item_label": self.name or None,
             "debit": debit,
             "credit": credit,

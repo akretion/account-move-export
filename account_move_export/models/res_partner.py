@@ -17,6 +17,6 @@ class ResPartner(models.Model):
             res = self.ref or None
         return res
 
-    def _prepare_account_move_export_partner_label(self, export_options):
+    def _prepare_account_move_export_partner_name(self, export_options):
         self.ensure_one()
         return self.name

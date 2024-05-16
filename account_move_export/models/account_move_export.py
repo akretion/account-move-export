@@ -236,12 +236,10 @@ class AccountMoveExport(models.Model):
             ["account_move_export_id"],
             ["account_move_export_id"],
         )
-        move_data = dict(
-            [
-                (x["account_move_export_id"][0], x["account_move_export_id_count"])
-                for x in rg_move_res
-            ]
-        )
+        move_data = {
+            x["account_move_export_id"][0]: x["account_move_export_id_count"]
+            for x in rg_move_res
+        }
         for export in self:
             export.move_count = move_data.get(export.id, 0)
             export.move_line_count = self.env["account.move.line"].search_count(

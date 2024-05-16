@@ -106,9 +106,9 @@ class AccountMoveExportConfig(models.Model):
     )
     analytic_option = fields.Selection(
         [
-            ("no", "No"),
             ("all", "Yes, all plans"),
             ("plan_filter", "Yes, but only selected plans"),
+            ("no", "No"),
         ],
         string="Include Analytic",
         default="no",

@@ -3,11 +3,11 @@ name: tests
 on:
   pull_request:
     branches:
-      - "16.0*"
+      - "14.0*"
   push:
     branches:
-      - "16.0"
-      - "16.0-ocabot-*"
+      - "14.0"
+      - "14.0-ocabot-*"
 
 jobs:
   unreleased-deps:
@@ -35,12 +35,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - container: ghcr.io/oca/oca-ci/py3.10-ocb16.0:latest
+          - container: ghcr.io/oca/oca-ci/py3.6-ocb14.0:latest
             name: test with OCB
             makepot: "false"
     services:
       postgres:
-        image: postgres:12.0
+        image: postgres:9.6
         env:
           POSTGRES_USER: odoo
           POSTGRES_PASSWORD: odoo

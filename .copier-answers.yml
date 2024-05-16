@@ -13,14 +13,14 @@ github_enable_stale_action: true
 github_enforce_dev_status_compatibility: true
 include_wkhtmltopdf: false
 odoo_test_flavor: OCB
-odoo_version: 16.0
+odoo_version: 14.0
 org_name: Akretion
 org_slug: akretion
 rebel_module_groups: []
 repo_description: Odoo module to export journal entries to another accounting software
 repo_name: Account Move Export
-repo_slug: 'https://github.com/akretion/account-move-export'
-repo_website: 'https://github.com/akretion/account-move-export'
+repo_slug: https://github.com/akretion/account-move-export
+repo_website: https://github.com/akretion/account-move-export
 use_pyproject_toml: true
 use_ruff: true
 

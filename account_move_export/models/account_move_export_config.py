@@ -296,10 +296,10 @@ class AccountMoveExportConfigColumn(models.Model):
             "type": {"width": 4, "type": "char"},
             "entry_number": {"width": 14, "type": "char"},
             "date": {"width": 10, "type": "date"},
-            "journal_code": {"width": 10, "type": "char"},
-            "account_code": {"width": 12, "type": "char"},
+            "journal_code": {"width": 11, "type": "char"},
+            "account_code": {"width": 11, "type": "char"},
             "account_label": {"width": 30, "type": "char"},
-            "partner_code": {"width": 12, "type": "char"},
+            "partner_code": {"width": 11, "type": "char"},
             "partner_label": {"width": 30, "type": "char"},
             "item_label": {"width": 50, "type": "char"},
             "debit": {"width": 12, "type": "company_currency"},
@@ -308,7 +308,7 @@ class AccountMoveExportConfigColumn(models.Model):
             "reconcile_ref": {"width": 10, "type": "char"},
             "due_date": {"width": 10, "type": "date"},
             "origin_currency_amount": {"width": 12, "type": "float"},
-            "origin_currency_code": {"width": 12, "type": "char"},
+            "origin_currency_code": {"width": 9, "type": "char"},
             "empty": {"width": 5, "type": "char"},
         }
         for column in self:

@@ -407,7 +407,7 @@ class AccountMoveExport(models.Model):
         for col in cols:
             sheet.set_column(col["number"], col["number"], col["excel_width"])
         if export_options["header_line"]:
-            sheet.set_row(line, 24)
+            sheet.set_row(line, 30)
             for col in cols:
                 sheet.write(line, col["number"], col["header_label"], styles["header"])
             line += 1

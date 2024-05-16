@@ -89,10 +89,10 @@
 				<field name="sequence" widget="handle" />
 				<field name="field" />
 				<field name="header_label" />
-				<field name="field_type" />
+				<field name="field_type" optional="hide" />
 				<field
                                 name="excel_width"
-                                attrs="{'column_invisible': [('parent.file_format', '=', 'xlsx_generic')]}"
+                                attrs="{'column_invisible': [('parent.file_format', '!=', 'xlsx_generic')]}"
                             />
 			</tree>
 			</field>

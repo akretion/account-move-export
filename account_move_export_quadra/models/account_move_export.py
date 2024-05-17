@@ -4,7 +4,7 @@
 import mimetypes
 import zipfile
 from collections import OrderedDict
-from datetime import date, datetime
+from datetime import date
 from io import BytesIO, StringIO
 
 from odoo import _, models
@@ -89,14 +89,15 @@ class AccountMoveExport(models.Model):
             value = ldict[key]
             width = constraint["width"]
             padded_val = ""
-            if isinstance(value, date | datetime):
+            if isinstance(value, date):
+                # datetime is instance of date
                 padded_val = value.strftime("%d%m%y") if value else "".ljust(width, " ")
             elif isinstance(value, str):
                 # we want to ensure there is no \n
                 # in the text
                 oneline = " ".join(value.splitlines())
                 padded_val = oneline.ljust(width, " ")
-            elif isinstance(value, int | float):
+            elif isinstance(value, int) or isinstance(value, float):
                 padded_val = ("%.0f" % value).rjust(width, "0")
                 if len(padded_val) > width:
                     raise UserError(

@@ -34,7 +34,7 @@ class AccountMoveLine(models.Model):
         our["N° de pièce"] = self.move_id.id
         our["Code affaire"] = ""
         our["Quantité 1"] = ""
-        our["Numéro de pièce"] = default["entry_ref"]
+        our["Numéro de pièce jusqu'à 8 caractères"] = self.move_id.id
         our["Code devise"] = default["origin_currency_code"]
         our["Code journal sur 3"] = default["journal_code"]
         our["Flag Code TVA"] = ""
@@ -42,9 +42,14 @@ class AccountMoveLine(models.Model):
         our["Méthode de calcul TVA"] = ""
         our["Libellé écriture sur 30 caract"] = default["item_label"]
         our["Code TVA 2"] = ""
-        our["N° de pièce alphanumérique"] = default["entry_number"]
+        our["N° de pièce alphanumérique sur 10 caract."] = self.move_id.id
         our["Reservé"] = ""
-        our["Montant dans la devise"] = default["origin_currency_amount"]
+        our["Signe dans la devise"] = (
+            "+" if default["origin_currency_amount"] >= 0 else "-"
+        )
+        our["Montant dans la devise non signé"] = abs(
+            default["origin_currency_amount"] * 100
+        )
         our["Pièce jointe à l'écriture"] = attachment
         our["Quantité 2"] = ""
         our["NumUniq"] = ""

@@ -21,10 +21,10 @@ class AccountMoveLine(models.Model):
             or export_options["partner_option"] == "all"
         ):
             partner_code = self.partner_id._prepare_account_move_export_partner_code(
-                export_options
+                export_options, self
             )
             partner_name = self.partner_id._prepare_account_move_export_partner_name(
-                export_options
+                export_options, self
             )
         res = {
             "type": "G",

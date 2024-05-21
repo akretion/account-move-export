@@ -8,7 +8,7 @@ from odoo import models
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
-    def _prepare_account_move_export_partner_code(self, export_options):
+    def _prepare_account_move_export_partner_code(self, export_options, move_line_id):
         self.ensure_one()
         res = None
         if export_options["partner_code_field"] == "id":
@@ -17,6 +17,6 @@ class ResPartner(models.Model):
             res = self.ref or None
         return res
 
-    def _prepare_account_move_export_partner_name(self, export_options):
+    def _prepare_account_move_export_partner_name(self, export_options, move_line_id):
         self.ensure_one()
         return self.name

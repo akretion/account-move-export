@@ -12,8 +12,15 @@ class AccountMoveLine(models.Model):
     def _prepare_account_move_export_line(self, export_options):
         attachment_id = export_options["attachments"].get(self.move_id.id, False)
         attachment = attachment_id["filename"] if attachment_id else ""
-
         default = super()._prepare_account_move_export_line(export_options)
+
+        free_ref = ""
+        if self.move_id.reversed_entry_id:
+            # we us Libellé libre to tell if it's a credit note
+            free_ref = (
+                f"{self.move_id.reversed_entry_id.id}"
+                f" {self.move_id.reversed_entry_id.name}"
+            )
 
         # Always default to "" instead of False
         our = OrderedDict()
@@ -23,7 +30,7 @@ class AccountMoveLine(models.Model):
         our["N° folio"] = "000"
         our["Date écriture"] = default["date"]
         our["Code libellé"] = ""
-        our["Libellé libre"] = ""
+        our["Libellé libre"] = free_ref
         our["Sens Débit/Crédit"] = "D" if default["debit"] > 0 else "C"
         our["Signe"] = "+" if default["balance"] >= 0 else "-"
         our["Montant en centimes non signé"] = abs(default["balance"] * 100)

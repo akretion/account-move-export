@@ -12,7 +12,7 @@ class ResPartner(models.Model):
         self.ensure_one()
         res = None
         if export_options["partner_code_field"] == "id":
-            res = self.id
+            res = str(self.id)
         elif export_options["partner_code_field"] == "ref":
             res = self.ref or None
         return res

@@ -66,7 +66,7 @@ class AccountMoveExport(models.Model):
     date_range_id = fields.Many2one(
         "date.range",
         check_company=True,
-        domain="['|', ('company_id', '=', company_id), " "('company_id', '=', False)]",
+        domain="[('company_id', 'in', (company_id, False))]",
         states={"done": [("readonly", True)]},
     )
     date_start = fields.Date(
@@ -114,97 +114,15 @@ class AccountMoveExport(models.Model):
         default=lambda self: self.env.company,
         tracking=True,
     )
-    file_format = fields.Selection(
-        [
-            ("xlsx_generic", "Generic XLSX"),
-            ("csv_generic", "Generic CSV"),
-        ],
+    config_id = fields.Many2one(
+        "account.move.export.config",
+        string="Configuration",
         required=True,
-        tracking=True,
-        default="xlsx_generic",
-        states={"done": [("readonly", True)]},
-    )
-    header_line = fields.Boolean(default=True, states={"done": [("readonly", True)]})
-    date_format = fields.Char(default="%d/%m/%Y", states={"done": [("readonly", True)]})
-    partner_code_field = fields.Selection(
-        [
-            ("id", "Database ID"),
-            ("ref", "Reference"),
-        ],
-        default="id",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    partner_option = fields.Selection(
-        [
-            ("receivable_payable", "Receivable and Payable Accounts"),
-            ("accounts", "Selected Accounts"),
-            ("all", "All"),
-        ],
-        default="receivable_payable",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    partner_account_ids = fields.Many2many(
-        "account.account",
-        string="Accounts with Partner",
-        default=lambda self: self._default_partner_account_ids(),
         check_company=True,
-        domain="[('company_id', '=', company_id)]",
+        tracking=True,
         states={"done": [("readonly", True)]},
-    )
-    encoding = fields.Selection(
-        [
-            ("iso8859_15", "ISO-8859-15"),
-            ("utf-8", "UTF-8"),
-            ("ascii", "ASCII"),
-        ],
-        default="iso8859_15",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    decimal_separator = fields.Selection(
-        [
-            (".", "dot"),
-            (",", "coma"),
-        ],
-        default=".",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    delimiter = fields.Selection(
-        [
-            (",", "coma"),
-            (";", "semi-colon"),
-            ("|", "pipe"),
-            ("tab", "tab"),
-        ],
-        default=",",
-        string="Field Delimiter",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    quoting = fields.Selection(
-        [
-            ("minimal", "Minimal"),
-            ("all", "All"),
-            ("none", "None"),
-        ],
-        required=True,
-        default="minimal",
-        states={"done": [("readonly", True)]},
-    )
-    file_extension = fields.Selection(
-        [
-            (".csv", ".csv"),
-            (".txt", ".txt"),
-        ],
-        default=".csv",
-        required=True,
-        states={"done": [("readonly", True)]},
-    )
-    analytic = fields.Boolean(
-        string="Include Analytic", states={"done": [("readonly", True)]}
+        default=lambda self: self._default_config_id(),
+        domain="[('company_id', 'in', (False, company_id))]",
     )
     attachment_id = fields.Many2one("ir.attachment", readonly=True)
     attachment_datas = fields.Binary(
@@ -221,6 +139,17 @@ class AccountMoveExport(models.Model):
         readonly=True,
         tracking=True,
     )
+
+    @api.model
+    def _default_config_id(self):
+        config = self.env["account.move.export.config"].search(
+            [("company_id", "=", self.env.company.id)], limit=1
+        )
+        if not config:
+            config = self.env["account.move.export.config"].search(
+                [("company_id", "=", False)], limit=1
+            )
+        return config
 
     @api.depends("date_range_id")
     def _compute_dates(self):
@@ -285,16 +214,6 @@ class AccountMoveExport(models.Model):
                 )
         return super().unlink()
 
-    @api.model
-    def _default_partner_account_ids(self):
-        receivable_account = self.env["ir.property"]._get(
-            "property_account_receivable_id", "res.partner"
-        )
-        payable_account = self.env["ir.property"]._get(
-            "property_account_payable_id", "res.partner"
-        )
-        return payable_account + receivable_account
-
     def done2draft(self):
         self.ensure_one()
         assert self.state == "done"
@@ -323,47 +242,19 @@ class AccountMoveExport(models.Model):
         return domain
 
     def _prepare_columns(self):
-        # inherit this method to change the order of columns
-        cols = {
-            "entry_number": {"width": 14, "style": "char", "sequence": 20},
-            "date": {"width": 10, "style": "date", "sequence": 30},
-            "journal_code": {"width": 10, "style": "char", "sequence": 40},
-            "account_code": {"width": 12, "style": "char", "sequence": 50},
-            "account_label": {"width": 30, "style": "char", "sequence": 60},
-            "partner_code": {"width": 12, "style": "char", "sequence": 70},
-            "partner_label": {"width": 30, "style": "char", "sequence": 80},
-            "item_label": {"width": 50, "style": "char", "sequence": 90},
-            "debit": {"width": 10, "style": "company_currency", "sequence": 100},
-            "credit": {"width": 10, "style": "company_currency", "sequence": 110},
-            "entry_ref": {"width": 20, "style": "char", "sequence": 120},
-            "reconcile_ref": {"width": 10, "style": "char", "sequence": 130},
-            "due_date": {"width": 10, "style": "date", "sequence": 140},
-            "origin_currency_amount": {"width": 12, "style": "float", "sequence": 150},
-            "origin_currency_code": {"width": 12, "style": "char", "sequence": 160},
-        }
-        if self.analytic:
-            cols.update(
+        cols = []
+        number = 0
+        for column in self.config_id.column_ids:
+            cols.append(
                 {
-                    "analytic_account_code": {
-                        "width": 12,
-                        "style": "char",
-                        "sequence": 63,
-                    },
-                    "analytic_account_label": {
-                        "width": 30,
-                        "style": "char",
-                        "sequence": 65,
-                    },
+                    "field": column.field,
+                    "field_type": column.field_type,
+                    "excel_width": column.excel_width,
+                    "header_label": column.header_label,
+                    "number": number,
                 }
             )
-        line_obj = self.env["account.move.line"]
-        if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
-            cols.update(
-                {
-                    "start_date": {"width": 10, "style": "date", "sequence": 170},
-                    "end_date": {"width": 10, "style": "date", "sequence": 180},
-                }
-            )
+            number += 1
         return cols
 
     def _csv_format_amount(self, amount, export_options):
@@ -377,35 +268,38 @@ class AccountMoveExport(models.Model):
 
     def _csv_postprocess_line(self, ldict, export_options):
         row = {}
-        for col_name, col_prop in export_options["cols"].items():
-            if col_name in ldict:
-                if col_prop["style"] == "date" and ldict[col_name]:
-                    row[col_name] = ldict[col_name].strftime(
-                        export_options["date_format"]
-                    )
-                elif col_prop["style"] in ("company_currency", "float"):
-                    row[col_name] = self._csv_format_amount(
-                        ldict[col_name], export_options
-                    )
+        for col in export_options["cols"]:
+            field = col["field"]
+            header = col["header_label"]
+            if field in ldict:
+                if not col["field_type"]:
+                    row[header] = ""
+                elif col["field_type"] == "date" and ldict[field]:
+                    row[header] = ldict[field].strftime(export_options["date_format"])
+                elif col["field_type"] in ("company_currency", "float"):
+                    row[header] = self._csv_format_amount(ldict[field], export_options)
                 else:
-                    row[col_name] = ldict[col_name]
+                    row[header] = ldict[field]
         return row
 
     def _prepare_export_options(self):
+        self.ensure_one()
+        if not self.config_id:
+            raise UserError(
+                _("Missing configuration on journal entries export '%s'.")
+                % self.display_name
+            )
         export_options = {
-            "date_format": self.date_format,
-            "decimal_separator": self.decimal_separator,
-            "partner_code_field": self.partner_code_field,
-            "partner_option": self.partner_option,
+            "header_line": self.config_id.header_line,
+            "partner_code_field": self.config_id.partner_code_field,
+            "partner_option": self.config_id.partner_option,
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
-            "analytic": self.analytic,
             "cols": self._prepare_columns(),
-            "xlsx_font_size": 10,
         }
-        if self.partner_option == "accounts":
-            if not self.partner_account_ids:
+        if self.config_id.partner_option == "accounts":
+            if not self.config_id.partner_account_ids:
                 raise UserError(
                     _(
                         "As you chose 'Selected Accounts' as 'Partner Option', "
@@ -413,8 +307,10 @@ class AccountMoveExport(models.Model):
                         "will be exported."
                     )
                 )
-            export_options["partner_account_ids"] = self.partner_account_ids.ids
-        elif self.partner_option == "receivable_payable":  # just for perf
+            export_options[
+                "partner_account_ids"
+            ] = self.config_id.partner_account_ids.ids
+        elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
                 .search(
@@ -432,10 +328,37 @@ class AccountMoveExport(models.Model):
                 )
                 .ids
             )
+        if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
+            if (
+                self.config_id.quoting == "none"
+                and self.config_id.decimal_separator == self.config_id.delimiter
+            ):
+                raise UserError(
+                    _(
+                        "When there is no quoting, the field delimiter and the decimal "
+                        "separator must be different."
+                    )
+                )
+            quote_map = {
+                "all": csv.QUOTE_ALL,
+                "minimal": csv.QUOTE_MINIMAL,
+                "none": csv.QUOTE_NONE,
+            }
+            export_options.update(
+                {
+                    "date_format": self.config_id.date_format,
+                    "decimal_separator": self.config_id.decimal_separator,
+                    "encoding": self.config_id.encoding,
+                    "delimiter": self.config_id.delimiter == "tab"
+                    and "\t"
+                    or self.config_id.delimiter,
+                    "quoting": quote_map.get(self.config_id.quoting),
+                }
+            )
         return export_options
 
     def _xlsx_prepare_styles(self, workbook, export_options):
-        font_size = export_options["xlsx_font_size"]
+        font_size = self.config_id.xlsx_font_size
         company_currency_format = f"# ### ##0.00 {self.company_id.currency_id.symbol}"
         float_format = "# ### ##0.00"
         date_format = "dd/mm/yyyy"
@@ -469,73 +392,59 @@ class AccountMoveExport(models.Model):
         export_options = self._prepare_export_options()
         styles = self._xlsx_prepare_styles(workbook, export_options)
         cols = export_options["cols"]
-        field2col = {}
-        col = 0
-        for field, _vals in sorted(
-            export_options["cols"].items(), key=lambda x: x[1]["sequence"]
-        ):
-            field2col[field] = col
-            col += 1
         line = 0
-        for field, col in field2col.items():
-            sheet.set_column(col, col, cols[field]["width"])
-        if self.header_line:
-            sheet.set_row(line, 24)
-            for field, col in field2col.items():
-                sheet.write(line, col, field, styles["header"])
+        for col in cols:
+            sheet.set_column(col["number"], col["number"], col["excel_width"])
+        if export_options["header_line"]:
+            sheet.set_row(line, 30)
+            for col in cols:
+                sheet.write(line, col["number"], col["header_label"], styles["header"])
             line += 1
         for move in self.move_ids:
             for mline in move.line_ids.filtered(lambda x: not x.display_type):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
-                for field, col in field2col.items():
-                    if field in mline_dict:
+                for col in cols:
+                    if col["field"] in mline_dict:
                         sheet.write(
                             line,
-                            col,
-                            mline_dict[field],
-                            styles[cols[field]["style"]],
+                            col["number"],
+                            mline_dict[col["field"]],
+                            styles[col["field_type"]],
                         )
                 line += 1
-
         workbook.close()
         out_file.seek(0)
         return out_file.read()
 
     def _generate_csv_generic(self):
-        delimiter = self.delimiter == "tab" and "\t" or self.delimiter
-        quote_map = {
-            "all": csv.QUOTE_ALL,
-            "minimal": csv.QUOTE_MINIMAL,
-            "none": csv.QUOTE_NONE,
-        }
         tmpfile = StringIO()
         export_options = self._prepare_export_options()
-        col_list = [
-            y[0]
-            for y in sorted(
-                export_options["cols"].items(), key=lambda x: x[1]["sequence"]
-            )
-        ]
+        col_list = [col["header_label"] for col in export_options["cols"]]
         w = csv.DictWriter(
-            tmpfile, col_list, delimiter=delimiter, quoting=quote_map[self.quoting]
+            tmpfile,
+            col_list,
+            delimiter=export_options["delimiter"],
+            quoting=export_options["quoting"],
         )
-        if self.header_line:
+        if export_options["header_line"]:
             w.writeheader()
         for move in self.move_ids:
             for mline in move.line_ids.filtered(lambda x: not x.display_type):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 row = self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(row)
-        return self._csv_encode(tmpfile)
+        return self._csv_encode(tmpfile, export_options)
 
-    def _csv_encode(self, tmpfile):
+    def _csv_encode(self, tmpfile, export_options):
         tmpfile.seek(0)
         data_str = tmpfile.read()
-        if self.encoding == "ascii":
+        if export_options["encoding"] == "ascii":
             data_str_to_encode = unidecode(data_str)
         else:
             data_str_to_encode = data_str
-        data_bytes = data_str_to_encode.encode(self.encoding, errors="replace")
+        data_bytes = data_str_to_encode.encode(
+            export_options["encoding"], errors="replace"
+        )
         return data_bytes
 
     def get_moves(self):
@@ -555,10 +464,10 @@ class AccountMoveExport(models.Model):
         moves.write({"account_move_export_id": self.id})
 
     def _prepare_filename(self):
-        if self.file_format == "csv_generic":
-            ext = self.file_extension
+        if self.config_id.file_format == "csv_generic":
+            ext = self.config_id.file_extension
         else:
-            ext = ".%s" % self.file_format.split("_")[0]
+            ext = ".%s" % self.config_id.file_format.split("_")[0]
         return "".join([self.name.replace("_", "") or "export", ext])
 
     def draft2done(self):
@@ -569,15 +478,7 @@ class AccountMoveExport(models.Model):
         if not self.move_ids:
             raise UserError(_("No journal entries to export."))
 
-        if self.quoting == "none" and self.decimal_separator == self.delimiter:
-            raise UserError(
-                _(
-                    "When there is no quoting, the field delimiter and the decimal "
-                    "separator must be different."
-                )
-            )
-
-        method_name = f"_generate_{self.file_format}"
+        method_name = f"_generate_{self.config_id.file_format}"
         data_bytes_pointer = getattr(self, method_name)
         data_bytes = data_bytes_pointer()
 

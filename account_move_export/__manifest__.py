@@ -4,7 +4,7 @@
 
 {
     "name": "Account Move Export",
-    "version": "14.0.1.0.0",
+    "version": "14.0.2.0.0",
     "category": "Accounting",
     "license": "AGPL-3",
     "summary": "Export journal entries to specific formats",
@@ -17,8 +17,10 @@
         "security/ir.model.access.csv",
         "security/ir_rule.xml",
         "data/ir_sequence.xml",
+        "data/account_move_export_config.xml",
         "wizards/account_move_export_new_view.xml",
         "views/account_move_export.xml",
+        "views/account_move_export_config.xml",
         "views/account_move.xml",
     ],
     "installable": True,

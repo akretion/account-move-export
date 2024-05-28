@@ -4,13 +4,12 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-07 16:12+0000\n"
-"PO-Revision-Date: 2024-05-07 16:12+0000\n"
-"Last-Translator: Alexis de Lattre <alexis.delattre@akretion.com>\n"
+"POT-Creation-Date: 2024-05-28 14:56+0000\n"
+"PO-Revision-Date: 2024-05-28 14:56+0000\n"
+"Last-Translator: \n"
 "Language-Team: \n"
-"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -27,7 +26,6 @@ msgid "# of Journal Items"
 msgstr "Nb d'écritures comptables"
 
 #. module: account_move_export
-#. odoo-python
 #: code:addons/account_move_export/wizards/account_move_export_new.py:0
 #, python-format
 msgid ""
@@ -38,22 +36,34 @@ msgstr ""
 "%(journal_entries)s."
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__file_extension___csv
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_extension___csv
 msgid ".csv"
-msgstr ".csv"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__file_extension___txt
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_extension___txt
 msgid ".txt"
-msgstr ".txt"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__encoding__ascii
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__ascii
 msgid "ASCII"
-msgstr "ASCII"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__partner_account_ids
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Account Code"
+msgstr "Code du compte"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Account Name"
+msgstr "Nom du compte"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__partner_account_ids
 msgid "Accounts with Partner"
 msgstr "Comptes avec partenaire"
 
@@ -61,6 +71,11 @@ msgstr "Comptes avec partenaire"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_needaction
 msgid "Action Needed"
 msgstr "Action requise"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__active
+msgid "Active"
+msgstr "Actif"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_ids
@@ -83,8 +98,8 @@ msgid "Activity Type Icon"
 msgstr "Îcone du type d'activité"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_option__all
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__quoting__all
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__partner_option__all
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__quoting__all
 msgid "All"
 msgstr "Tous"
 
@@ -99,9 +114,27 @@ msgid "Already Exported"
 msgstr "Déjà exportées"
 
 #. module: account_move_export
-#: model:ir.model,name:account_move_export.model_account_analytic_line
-msgid "Analytic Line"
-msgstr "Ligne analytique"
+#: model:ir.model.constraint,message:account_move_export.constraint_account_move_export_config_name_company_uniq
+msgid "An export already exists with the same name."
+msgstr "Un export portant le même nom existe déjà."
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Analytic Account Code"
+msgstr "Code du compte analytique"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Analytic Account Name"
+msgstr "Nom du compte analytique"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_search
+msgid "Archived"
+msgstr "Archivé"
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
@@ -109,16 +142,15 @@ msgid "Are you sure you want to go back to draft?"
 msgstr "Êtes-vous sûr de vouloir revenir à l'état brouillon ?"
 
 #. module: account_move_export
-#. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid ""
-"As you chose 'Selected Accounts' as 'Partner Option', you must select one or "
-"several accounts for which the partner will be exported."
+"As you chose 'Selected Accounts' as 'Partner Option', you must select one or"
+" several accounts for which the partner will be exported."
 msgstr ""
-"Comme vous avez choisi \"Comptes sélectionnés\" comme \"Option partenaire\", "
-"vous devez sélectionner un ou plusieurs comptes pour lesquels le partenaire "
-"sera exporté."
+"Comme vous avez choisi \"Comptes sélectionnés\" comme \"Option partenaire\","
+" vous devez sélectionner un ou plusieurs comptes pour lesquels le partenaire"
+" sera exporté."
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_id
@@ -136,12 +168,22 @@ msgid "Back to Draft"
 msgstr "Remettre en brouillon"
 
 #. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Balance (Debit - Credit)"
+msgstr "Solde (débit - crédit)"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "CSV configuration"
+msgstr "Configuration CSV"
+
+#. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_new_form
 msgid "Cancel"
 msgstr "Annuler"
 
 #. module: account_move_export
-#. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid ""
@@ -152,14 +194,51 @@ msgstr ""
 "Vous devez d'abord le remettre en brouillon."
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__char
+msgid "Character"
+msgstr "Caractère"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__column_ids
+msgid "Column Configuration"
+msgstr "Configuration des colonnes"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "Columns"
+msgstr "Colonnes"
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__company_id
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__company_id
 msgid "Company"
 msgstr "Société"
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__company_currency
+msgid "Company Currency"
+msgstr "Devise de la société"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__config_id
+msgid "Config"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__config_id
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
+msgid "Configuration"
+msgstr ""
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "Configuration Name"
+msgstr "Nom de la configuration"
+
+#. module: account_move_export
 #: model:ir.model,name:account_move_export.model_res_partner
 msgid "Contact"
-msgstr "Contact"
+msgstr ""
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_new_form
@@ -168,12 +247,16 @@ msgstr "Créer"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__create_uid
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__create_uid
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__create_uid
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__create_uid
 msgid "Created by"
 msgstr "Créé par"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__create_date
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__create_date
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__create_date
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__create_date
 msgid "Created on"
 msgstr "Créé le"
@@ -184,19 +267,32 @@ msgid "Creation Date"
 msgstr "Date de création"
 
 #. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Credit"
+msgstr "Crédit"
+
+#. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__filter_type__custom
 msgid "Custom"
 msgstr "Sur mesure"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_code_field__id
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__partner_code_field__id
 msgid "Database ID"
 msgstr "ID de la base de données"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_format
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__date
+#, python-format
+msgid "Date"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__date_format
 msgid "Date Format"
-msgstr "Format de date"
+msgstr "Format de la date"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_range_id
@@ -204,23 +300,36 @@ msgid "Date Range"
 msgstr "Plage de date"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__decimal_separator
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Debit"
+msgstr "Débit"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__decimal_separator
 msgid "Decimal Separator"
 msgstr "Séparateur décimal"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__display_name
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__display_name
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__display_name
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:account_move_export.field_res_partner__display_name
 msgid "Display Name"
 msgstr "Nom affiché"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__state__done
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
 msgid "Done"
 msgstr "Terminé"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__state__draft
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
 msgid "Draft"
 msgstr "Brouillon"
 
@@ -230,21 +339,47 @@ msgid "Draft and Posted Entries"
 msgstr "Écritures brouillon et comptabilisées"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__encoding
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Due Date"
+msgstr "Date d'échéance"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Empty"
+msgstr "Vide"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__encoding
 msgid "Encoding"
 msgstr "Encodage"
 
 #. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_end
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
+#, python-format
 msgid "End Date"
 msgstr "Date de fin"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Entry Number"
+msgstr "Numéro de pièce"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__excel_width
+msgid "Excel Width"
+msgstr "Largeur Excel"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_bank_statement_line__account_move_export_id
 #: model:ir.model.fields,field_description:account_move_export.field_account_move__account_move_export_id
 #: model:ir.model.fields,field_description:account_move_export.field_account_payment__account_move_export_id
 msgid "Export"
-msgstr "Export"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_datas
@@ -253,29 +388,34 @@ msgid "Export File"
 msgstr "Fichier d'export"
 
 #. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Export File Configuration"
-msgstr "Configuration du fichier d'export"
-
-#. module: account_move_export
 #: model:ir.actions.act_window,name:account_move_export.account_move_export_new_action
 #: model:ir.actions.act_window,name:account_move_export.account_move_export_new_from_lines_action
 msgid "Export Journal Entries"
 msgstr "Exporter les pièces comptables"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__delimiter
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__field
+msgid "Field"
+msgstr "Champ"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__delimiter
 msgid "Field Delimiter"
 msgstr "Délimiteur de champ"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__file_extension
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__field_type
+msgid "Field Type"
+msgstr "Type de champ"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__file_extension
 msgid "File Extension"
 msgstr "Extension du fichier"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__file_format
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__file_format
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_search
 msgid "File Format"
 msgstr "Format du fichier"
 
@@ -295,14 +435,29 @@ msgid "Filters"
 msgstr "Filtres"
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__float
+msgid "Float"
+msgstr "Nom décimal"
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_follower_ids
 msgid "Followers"
 msgstr "Abonnés"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_channel_ids
+msgid "Followers (Channels)"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_partner_ids
 msgid "Followers (Partners)"
 msgstr "Abonnés (partenaires)"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__xlsx_font_size
+msgid "Font Size"
+msgstr "Taille de la police"
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__activity_type_icon
@@ -315,12 +470,12 @@ msgid "Generate File"
 msgstr "Générer le fichier"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__file_format__csv_generic
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_format__csv_generic
 msgid "Generic CSV"
 msgstr "CSV générique"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__file_format__xlsx_generic
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_format__xlsx_generic
 msgid "Generic XLSX"
 msgstr "XLSX générique"
 
@@ -330,25 +485,30 @@ msgid "Get Journal Entries"
 msgstr "Obtenir les pièces comptables"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__has_message
-msgid "Has Message"
-msgstr "A un message"
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__header_label
+msgid "Header Label"
+msgstr "Libellé de l'en-tête"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__header_line
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__header_line
 msgid "Header Line"
 msgstr "Ligne d'en-tête"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move__id
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__id
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__id
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__id
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__id
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_line__id
+#: model:ir.model.fields,field_description:account_move_export.field_res_partner__id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__encoding__iso8859_15
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__iso8859_15
 msgid "ISO-8859-15"
-msgstr "ISO-8859-15"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_exception_icon
@@ -362,6 +522,7 @@ msgstr "Îcone pour indiquer une activité-alerte"
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_needaction
+#: model:ir.model.fields,help:account_move_export.field_account_move_export__message_unread
 msgid "If checked, new messages require your attention."
 msgstr "Si activé, de nouveaux messages nécessitent votre attention."
 
@@ -371,14 +532,15 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si activé, des messages ont une erreur d'envoi."
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__analytic
-msgid "Include Analytic"
-msgstr "Inclure l'analytique"
-
-#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_is_follower
 msgid "Is Follower"
 msgstr "Est abonné"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Journal Code"
+msgstr "Code du journal"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__move_ids
@@ -392,15 +554,26 @@ msgid "Journal Entries Export"
 msgstr "Export de pièces comptables"
 
 #. module: account_move_export
+#: model:ir.model,name:account_move_export.model_account_move_export_config_column
+msgid "Journal Entries Export Columns Configuration"
+msgstr "Configuration des colonnes de l'export des pièces comptables"
+
+#. module: account_move_export
+#: model:ir.model,name:account_move_export.model_account_move_export_config
+msgid "Journal Entries Export Configuration"
+msgstr "Configuration de l'export des pièces comptables"
+
+#. module: account_move_export
 #: model:ir.actions.act_window,name:account_move_export.account_move_export_action
 #: model:ir.ui.menu,name:account_move_export.account_move_export_menu
 msgid "Journal Entries Exports"
 msgstr "Exports de pièces comptables"
 
 #. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Journal Entries Fullscreen"
-msgstr "Pièces comptables en plein écran"
+#: model:ir.actions.act_window,name:account_move_export.account_move_export_config_action
+#: model:ir.ui.menu,name:account_move_export.account_move_export_config_menu
+msgid "Journal Entries Exports Configuration"
+msgstr "Configuration de l'export des pièces comptables"
 
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move
@@ -408,9 +581,21 @@ msgid "Journal Entry"
 msgstr "Pièce comptable"
 
 #. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Journal Entry Ref"
+msgstr "Référence de la pièce comptable"
+
+#. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move_line
 msgid "Journal Item"
 msgstr "Écriture comptable"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Journal Item Label"
+msgstr "Libellé de l'écriture comptable"
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
@@ -418,29 +603,33 @@ msgid "Journal Items"
 msgstr "Écritures comptables"
 
 #. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Journal Items Fullscreen"
-msgstr "Écritures comptables en plein écran"
-
-#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids
 msgid "Journals"
 msgstr "Journaux"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move____last_update
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export____last_update
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config____last_update
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column____last_update
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new____last_update
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_line____last_update
+#: model:ir.model.fields,field_description:account_move_export.field_res_partner____last_update
 msgid "Last Modified on"
 msgstr "Dernière modification le"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__write_uid
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__write_uid
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__write_uid
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__write_uid
 msgid "Last Updated by"
 msgstr "Dernière mise à jour par"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__write_date
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__write_date
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__write_date
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__write_date
 msgid "Last Updated on"
 msgstr "Dernière mise à jour le"
@@ -458,12 +647,18 @@ msgstr "Erreur d'envoi du message"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_ids
 msgid "Messages"
-msgstr "Messages"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__quoting__minimal
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__quoting__minimal
 msgid "Minimal"
 msgstr "Minime"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Missing configuration on journal entries export '%s'."
+msgstr "Configuration manquante pour l'export des pièces comptables '%s'."
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__my_activity_date_deadline
@@ -472,20 +667,18 @@ msgstr "Date butoir de l'activité"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__name
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__name
 msgid "Name"
 msgstr "Nom"
 
 #. module: account_move_export
-#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#: code:addons/account_move_export/models/account_move_export.py:0
+#: code:addons/account_move_export/models/account_move_export.py:0
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid "New"
 msgstr "Nouveau"
-
-#. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_calendar_event_id
-msgid "Next Activity Calendar Event"
-msgstr "Prochaine activité du calendrier"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_date_deadline
@@ -503,14 +696,13 @@ msgid "Next Activity Type"
 msgstr "Type de l'activité suivante"
 
 #. module: account_move_export
-#. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid "No journal entries to export."
 msgstr "Aucune pièce comptable à exporter."
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__quoting__none
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__quoting__none
 msgid "None"
 msgstr "Aucun"
 
@@ -531,8 +723,8 @@ msgstr "Nombre d'erreurs"
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_needaction_counter
-msgid "Number of messages requiring action"
-msgstr "Nombre de messages nécessitant une action"
+msgid "Number of messages which requires an action"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_has_error_counter
@@ -540,27 +732,62 @@ msgid "Number of messages with delivery error"
 msgstr "Nombre de messages en échec d'envoi"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__partner_code_field
+#: model:ir.model.fields,help:account_move_export.field_account_move_export__message_unread_counter
+msgid "Number of unread messages"
+msgstr ""
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Origin Currency Amount"
+msgstr "Montant dans la devise d'origine"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Origin Currency Code"
+msgstr "Code devise d'origine"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Partner Code"
+msgstr "Code partenaire"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__partner_code_field
 msgid "Partner Code Field"
 msgstr "Champ du code partenaire"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__partner_option
-msgid "Partner Option"
-msgstr "Option partenaire"
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Partner Name"
+msgstr "Nom du partenaire"
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__quoting
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__partner_option
+msgid "Partner Option"
+msgstr "Option pour le partenaire"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__quoting
 msgid "Quoting"
 msgstr "Mise entre guillemets"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_option__receivable_payable
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__partner_option__receivable_payable
 msgid "Receivable and Payable Accounts"
-msgstr "Comptes débiteurs et créditeurs"
+msgstr "Comptes clients et fournisseurs"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_code_field__ref
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Reconcile Ref"
+msgstr "Ref. lettrage"
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__partner_code_field__ref
 msgid "Reference"
 msgstr "Référence"
 
@@ -575,13 +802,31 @@ msgid "Selected"
 msgstr "Sélectionné"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__partner_option__accounts
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__partner_option__accounts
 msgid "Selected Accounts"
 msgstr "Comptes sélectionnés"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__sequence
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Show journal entries fullscreen"
+msgstr "Afficher les pièces comptables en plein écran"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Show journal items fullscreen"
+msgstr "Afficher les écritures comptables en plein écran"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_start
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
+#, python-format
 msgid "Start Date"
 msgstr "Date de début"
 
@@ -609,7 +854,16 @@ msgid "Target Journal Entries"
 msgstr "Écritures cibles"
 
 #. module: account_move_export
-#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid ""
+"The configuration %s has the partner option set to 'Selected Accounts', so "
+"it must be linked to a specific company."
+msgstr ""
+"Dans la configuration %s, l'option partenaire est définie sur \"Comptes "
+"sélectionnés\" ; elle doit donc être liée à une société spécifique."
+
+#. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid "The end date (%(date_end)s) is before the start date (%(date_start)s)."
@@ -618,11 +872,20 @@ msgstr ""
 "(%(date_start)s)."
 
 #. module: account_move_export
-#. odoo-python
+#: model:ir.model.constraint,message:account_move_export.constraint_account_move_export_config_xlsx_font_size_positive
+msgid "The font size must be strictly positive."
+msgstr "La taille de police doit être strictement positive."
+
+#. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid "There are no journal entries that matches the criteria."
 msgstr "Aucune pièce comptable ne correspond aux critères."
+
+#. module: account_move_export
+#: model:ir.model.constraint,message:account_move_export.constraint_account_move_export_config_column_config_header_uniq
+msgid "This header already exists in this configuration."
+msgstr "Cet en-tête existe déjà dans cette configuration."
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_new_form
@@ -630,7 +893,7 @@ msgid ""
 "This wizard will create a new journal entry export for the selected journal "
 "entries."
 msgstr ""
-"Cet assistant crée un nouvel export d'écritures comptables pour les pièces "
+"Cet assistant crée un nouvel export de pièces comptables pour les pièces "
 "comptables sélectionnées."
 
 #. module: account_move_export
@@ -639,9 +902,19 @@ msgid "Type of the exception activity on record."
 msgstr "Type de l'activité-alerte sur l'enregistrement."
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__encoding__utf-8
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__utf-8
 msgid "UTF-8"
-msgstr "UTF-8"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_unread
+msgid "Unread Messages"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_unread_counter
+msgid "Unread Messages Counter"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__website_message_ids
@@ -654,15 +927,14 @@ msgid "Website communication history"
 msgstr "Historique des échanges sur le site Web"
 
 #. module: account_move_export
-#. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid ""
-"When there is no quoting, the field delimiter and the decimal separator must "
-"be different."
+"When there is no quoting, the field delimiter and the decimal separator must"
+" be different."
 msgstr ""
-"En l'absence de guillemets, le délimiteur de champ et le séparateur décimal "
-"doivent être différents."
+"En l'absence de mise entre guillemets, le délimiteur de champ et le "
+"séparateur décimal doivent être différents."
 
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move_export_new
@@ -672,27 +944,32 @@ msgstr ""
 "sélectionnées"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__decimal_separator__,
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__delimiter__,
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "XLSX configuration"
+msgstr "Configuration XLSX"
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__decimal_separator__,
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__delimiter__,
 msgid "coma"
 msgstr "virgule"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__decimal_separator___
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__decimal_separator___
 msgid "dot"
 msgstr "point"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__delimiter__|
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__delimiter__|
 msgid "pipe"
-msgstr "pipe"
+msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__delimiter__;
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__delimiter__;
 msgid "semi-colon"
 msgstr "point-virgule"
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__delimiter__tab
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__delimiter__tab
 msgid "tab"
 msgstr "tabulation"

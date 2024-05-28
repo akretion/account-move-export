@@ -12,11 +12,11 @@ class ResPartner(models.Model):
         self.ensure_one()
         res = None
         if export_options["partner_code_field"] == "id":
-            res = self.id
+            res = str(self.id)
         elif export_options["partner_code_field"] == "ref":
             res = self.ref or None
         return res
 
-    def _prepare_account_move_export_partner_label(self, export_options):
+    def _prepare_account_move_export_partner_name(self, export_options):
         self.ensure_one()
         return self.name

@@ -32,7 +32,7 @@ class AccountMoveLine(models.Model):
         our["Code libellé"] = ""
         our["Libellé libre"] = free_ref
         our["Sens Débit/Crédit"] = "D" if default["debit"] > 0 else "C"
-        our["Signe"] = "+" if default["balance"] >= 0 else "-"
+        our["Signe"] = "+"  # always + because sign is in Debit / Credit
         our["Montant en centimes non signé"] = abs(default["balance"] * 100)
         our["Compte de contrepartie"] = ""
         our["Date échéance"] = default["due_date"] or ""

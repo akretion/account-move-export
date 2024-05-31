@@ -5,8 +5,8 @@
         id="account_move_export_quadra_default_config"
         model="account.move.export.config"
     >
-	<field name="name">Default Quadra Export Configuration</field>
-	<field name="file_format">zip_quadra</field>
+        <field name="name">Default Quadra Export Configuration</field>
+        <field name="file_format">zip_quadra</field>
 </record>
 
 </odoo>

@@ -36,7 +36,7 @@ class AccountMoveLine(models.Model):
         our["Montant en centimes non signé"] = abs(default["balance"] * 100)
         our["Compte de contrepartie"] = ""
         our["Date échéance"] = default["due_date"] or ""
-        our["Code lettrage"] = self.full_reconcile_id.name
+        our["Code lettrage"] = ""  # 2char too short for full_reconcile_id.name
         our["Code statistiques"] = ""
         our["N° de pièce"] = self.move_id.id
         our["Code affaire"] = ""

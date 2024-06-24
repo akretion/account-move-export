@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-28 14:56+0000\n"
-"PO-Revision-Date: 2024-05-28 14:56+0000\n"
+"POT-Creation-Date: 2024-06-24 15:59+0000\n"
+"PO-Revision-Date: 2024-06-24 15:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -301,6 +301,11 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__decimal_separator
 msgid "Decimal Separator"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_journal_ids
+msgid "Default Journals"
 msgstr ""
 
 #. module: account_move_export
@@ -628,6 +633,33 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock
+msgid "Lock After Generation"
+msgstr ""
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date <b>not updated</b> because the end date is not set."
+msgstr ""
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date updated to %s."
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__fiscalyear
+msgid "Lock for All Users"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__period
+msgid "Lock for Non-Advisers"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_main_attachment_id
 msgid "Main Attachment"
 msgstr ""
@@ -686,6 +718,11 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_type_id
 msgid "Next Activity Type"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__no
+msgid "No"
 msgstr ""
 
 #. module: account_move_export
@@ -843,11 +880,24 @@ msgid "Target Journal Entries"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax
+msgid "Tax Lock"
+msgstr ""
+
+#. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #, python-format
 msgid ""
 "The configuration %s has the partner option set to 'Selected Accounts', so "
 "it must be linked to a specific company."
+msgstr ""
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid ""
+"The configuration '%s' has default journals, so it must be linked to a "
+"specific company."
 msgstr ""
 
 #. module: account_move_export

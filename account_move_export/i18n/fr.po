@@ -6,10 +6,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-28 14:56+0000\n"
-"PO-Revision-Date: 2024-05-28 14:56+0000\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2024-06-24 16:03+0000\n"
+"PO-Revision-Date: 2024-06-24 16:06+0000\n"
+"Last-Translator: Alexis de Lattre <alexis.delattre@akretion.com>\n"
 "Language-Team: \n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
@@ -38,17 +39,17 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_extension___csv
 msgid ".csv"
-msgstr ""
+msgstr ".csv"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_extension___txt
 msgid ".txt"
-msgstr ""
+msgstr ".txt"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__ascii
 msgid "ASCII"
-msgstr ""
+msgstr "ASCII"
 
 #. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export_config.py:0
@@ -145,12 +146,12 @@ msgstr "Êtes-vous sûr de vouloir revenir à l'état brouillon ?"
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid ""
-"As you chose 'Selected Accounts' as 'Partner Option', you must select one or"
-" several accounts for which the partner will be exported."
+"As you chose 'Selected Accounts' as 'Partner Option', you must select one or "
+"several accounts for which the partner will be exported."
 msgstr ""
-"Comme vous avez choisi \"Comptes sélectionnés\" comme \"Option partenaire\","
-" vous devez sélectionner un ou plusieurs comptes pour lesquels le partenaire"
-" sera exporté."
+"Comme vous avez choisi \"Comptes sélectionnés\" comme \"Option partenaire\", "
+"vous devez sélectionner un ou plusieurs comptes pour lesquels le partenaire "
+"sera exporté."
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_id
@@ -222,13 +223,13 @@ msgstr "Devise de la société"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__config_id
 msgid "Config"
-msgstr ""
+msgstr "Config"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__config_id
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
 msgid "Configuration"
-msgstr ""
+msgstr "Configuration"
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
@@ -238,7 +239,7 @@ msgstr "Nom de la configuration"
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_res_partner
 msgid "Contact"
-msgstr ""
+msgstr "Contact"
 
 #. module: account_move_export
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_new_form
@@ -287,7 +288,7 @@ msgstr "ID de la base de données"
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__date
 #, python-format
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__date_format
@@ -309,6 +310,11 @@ msgstr "Débit"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__decimal_separator
 msgid "Decimal Separator"
 msgstr "Séparateur décimal"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_journal_ids
+msgid "Default Journals"
+msgstr "Journaux par défaut"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move__display_name
@@ -379,7 +385,7 @@ msgstr "Largeur Excel"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move__account_move_export_id
 #: model:ir.model.fields,field_description:account_move_export.field_account_payment__account_move_export_id
 msgid "Export"
-msgstr ""
+msgstr "Export"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_datas
@@ -447,7 +453,7 @@ msgstr "Abonnés"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_channel_ids
 msgid "Followers (Channels)"
-msgstr ""
+msgstr "Suiveurs (chaînes)"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_partner_ids
@@ -503,12 +509,12 @@ msgstr "Ligne d'en-tête"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_line__id
 #: model:ir.model.fields,field_description:account_move_export.field_res_partner__id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__iso8859_15
 msgid "ISO-8859-15"
-msgstr ""
+msgstr "ISO-8859-15"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_exception_icon
@@ -635,6 +641,35 @@ msgid "Last Updated on"
 msgstr "Dernière mise à jour le"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock
+msgid "Lock After Generation"
+msgstr "Verrouiller après génération"
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date <b>not updated</b> because the end date is not set."
+msgstr ""
+"La date de verrouillage <b>n'est pas mise à jour</b> car la date de fin n'est pas "
+"définie."
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date updated to %s."
+msgstr "Date de verrouillage mise à jour au %s."
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__fiscalyear
+msgid "Lock for All Users"
+msgstr "Verrouillage pour tous les utilisateurs"
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__period
+msgid "Lock for Non-Advisers"
+msgstr "Verrouillage sauf groupe 'Paramétrage facturation'"
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_main_attachment_id
 msgid "Main Attachment"
 msgstr "Pièce jointe principale"
@@ -647,7 +682,7 @@ msgstr "Erreur d'envoi du message"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "Messages"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__quoting__minimal
@@ -673,9 +708,6 @@ msgstr "Nom"
 
 #. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid "New"
 msgstr "Nouveau"
@@ -694,6 +726,11 @@ msgstr "Résumé de l'activité suivante"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_type_id
 msgid "Next Activity Type"
 msgstr "Type de l'activité suivante"
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__no
+msgid "No"
+msgstr "Non"
 
 #. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export.py:0
@@ -724,7 +761,7 @@ msgstr "Nombre d'erreurs"
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr ""
+msgstr "Nombre de messages nécessitant une action"
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_has_error_counter
@@ -734,7 +771,7 @@ msgstr "Nombre de messages en échec d'envoi"
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_unread_counter
 msgid "Number of unread messages"
-msgstr ""
+msgstr "Nombre de messages non lus"
 
 #. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export_config.py:0
@@ -854,6 +891,11 @@ msgid "Target Journal Entries"
 msgstr "Écritures cibles"
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax
+msgid "Tax Lock"
+msgstr "Verrouillage des taxes"
+
+#. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #, python-format
 msgid ""
@@ -861,7 +903,17 @@ msgid ""
 "it must be linked to a specific company."
 msgstr ""
 "Dans la configuration %s, l'option partenaire est définie sur \"Comptes "
-"sélectionnés\" ; elle doit donc être liée à une société spécifique."
+"sélectionnés\" ; elle doit donc être affectée à une société spécifique."
+
+#. module: account_move_export
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid ""
+"The configuration '%s' has default journals, so it must be linked to a "
+"specific company."
+msgstr ""
+"La configuration \"%s\" a des journaux par défaut, elle doit donc être affectée "
+"à une société spécifique."
 
 #. module: account_move_export
 #: code:addons/account_move_export/models/account_move_export.py:0
@@ -904,17 +956,17 @@ msgstr "Type de l'activité-alerte sur l'enregistrement."
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__encoding__utf-8
 msgid "UTF-8"
-msgstr ""
+msgstr "UTF-8"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_unread
 msgid "Unread Messages"
-msgstr ""
+msgstr "Messages non lus"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_unread_counter
 msgid "Unread Messages Counter"
-msgstr ""
+msgstr "Compteur de messages non lus"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__website_message_ids
@@ -930,8 +982,8 @@ msgstr "Historique des échanges sur le site Web"
 #: code:addons/account_move_export/models/account_move_export.py:0
 #, python-format
 msgid ""
-"When there is no quoting, the field delimiter and the decimal separator must"
-" be different."
+"When there is no quoting, the field delimiter and the decimal separator must "
+"be different."
 msgstr ""
 "En l'absence de mise entre guillemets, le délimiteur de champ et le "
 "séparateur décimal doivent être différents."

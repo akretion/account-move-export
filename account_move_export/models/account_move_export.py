@@ -88,6 +88,9 @@ class AccountMoveExport(models.Model):
     )
     journal_ids = fields.Many2many(
         "account.journal",
+        compute="_compute_journal_ids",
+        store=True,
+        readonly=False,
         string="Journals",
         check_company=True,
         required=False,
@@ -150,6 +153,12 @@ class AccountMoveExport(models.Model):
                 [("company_id", "=", False)], limit=1
             )
         return config
+
+    @api.depends("config_id")
+    def _compute_journal_ids(self):
+        for export in self:
+            if export.config_id and export.config_id.default_journal_ids:
+                export.journal_ids = export.config_id.default_journal_ids.ids
 
     @api.depends("date_range_id")
     def _compute_dates(self):
@@ -495,6 +504,35 @@ class AccountMoveExport(models.Model):
                 "attachment_id": attach.id,
             }
         )
+        self._lock()
+
+    def _lock(self):
+        if self.config_id.lock and self.config_id.lock != "no":
+            if self.date_end:
+                vals = {}
+                self._update_lock_vals("tax_lock_date", vals)
+                if self.config_id.lock in ("period", "fiscalyear"):
+                    self._update_lock_vals("period_lock_date", vals)
+                if self.config_id.lock == "fiscalyear":
+                    self._update_lock_vals("fiscalyear_lock_date", vals)
+                if vals:
+                    self.company_id.sudo().write(vals)
+                    self.message_post(
+                        body=_("Lock date updated to %s.")
+                        % format_date(self.env, self.date_end)
+                    )
+            else:
+                self.message_post(
+                    body=_(
+                        "Lock date <b>not updated</b> because the end date is not set."
+                    )
+                )
+
+    def _update_lock_vals(self, field, vals):
+        if (
+            self.company_id[field] and self.company_id[field] < self.date_end
+        ) or not self.company_id[field]:
+            vals[field] = self.date_end
 
     def button_account_move_fullscreen(self):
         self.ensure_one()

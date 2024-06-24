@@ -81,10 +81,12 @@
                     <field
                                 name="date_start"
                                 attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
+                                options="{'datepicker': {'warn_future': true}}"
                             />
                     <field
                                 name="date_end"
                                 attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
+                                options="{'datepicker': {'warn_future': true}}"
                             />
                     <field
                                 name="journal_ids"

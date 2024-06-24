@@ -58,6 +58,22 @@ class AccountMoveExportConfig(models.Model):
         check_company=True,
         domain="[('company_id', '=', company_id)]",
     )
+    default_journal_ids = fields.Many2many(
+        "account.journal",
+        check_company=True,
+        domain="[('company_id', '=', company_id)]",
+        string="Default Journals",
+    )
+    lock = fields.Selection(
+        [
+            ("no", "No"),
+            ("tax", "Tax Lock"),
+            ("period", "Lock for Non-Advisers"),
+            ("fiscalyear", "Lock for All Users"),
+        ],
+        default="no",
+        string="Lock After Generation",
+    )
     encoding = fields.Selection(
         [
             ("iso8859_15", "ISO-8859-15"),
@@ -118,18 +134,27 @@ class AccountMoveExportConfig(models.Model):
         ),
     ]
 
-    @api.constrains("company_id", "partner_option")
+    @api.constrains("company_id", "partner_option", "default_journal_ids")
     def _check_config(self):
         for config in self:
-            if config.partner_option == "accounts" and not config.company_id:
-                raise ValidationError(
-                    _(
-                        "The configuration %s has the partner option set to "
-                        "'Selected Accounts', "
-                        "so it must be linked to a specific company."
+            if not config.company_id:
+                if config.partner_option == "accounts":
+                    raise ValidationError(
+                        _(
+                            "The configuration %s has the partner option set to "
+                            "'Selected Accounts', "
+                            "so it must be linked to a specific company."
+                        )
+                        % config.display_name
                     )
-                    % config.display_name
-                )
+                if config.default_journal_ids:
+                    raise ValidationError(
+                        _(
+                            "The configuration '%s' has default journals, so it "
+                            "must be linked to a specific company."
+                        )
+                        % config.display_name
+                    )
 
     @api.depends("partner_option", "company_id")
     def _compute_partner_account_ids(self):

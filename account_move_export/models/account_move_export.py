@@ -154,11 +154,21 @@ class AccountMoveExport(models.Model):
             )
         return config
 
-    @api.depends("config_id")
+    @api.depends("config_id", "company_id")
     def _compute_journal_ids(self):
         for export in self:
-            if export.config_id and export.config_id.default_journal_ids:
-                export.journal_ids = export.config_id.default_journal_ids.ids
+            if (
+                export.company_id
+                and export.config_id
+                and export.config_id.default_journal_ids
+            ):
+                export.journal_ids = [
+                    j.id
+                    for j in export.config_id.default_journal_ids
+                    if j.company_id.id == export.company_id.id
+                ]
+            else:
+                export.journal_ids = False
 
     @api.depends("date_range_id")
     def _compute_dates(self):
@@ -308,7 +318,9 @@ class AccountMoveExport(models.Model):
             "cols": self._prepare_columns(),
         }
         if self.config_id.partner_option == "accounts":
-            if not self.config_id.partner_account_ids:
+            if not self.config_id.partner_account_ids.filtered(
+                lambda x: x.company_id.id == self.company_id.id
+            ):
                 raise UserError(
                     _(
                         "As you chose 'Selected Accounts' as 'Partner Option', "
@@ -318,7 +330,9 @@ class AccountMoveExport(models.Model):
                 )
             export_options[
                 "partner_account_ids"
-            ] = self.config_id.partner_account_ids.ids
+            ] = self.config_id.partner_account_ids.filtered(
+                lambda x: x.company_id.id == self.company_id.id
+            ).ids
         elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]

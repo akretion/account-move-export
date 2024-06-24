@@ -69,11 +69,8 @@
                     </h1>
                 </div>
             <group name="main">
-                <group
-                            name="main-left"
-                            attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
-                            string="Filters"
-                        >
+                <group name="main-left">
+                    <field name="config_id" />
                     <field
                                 name="date_range_id"
                                 attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
@@ -98,18 +95,14 @@
                                 widget="radio"
                                 attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
                             />
-                    <field name="company_id" groups="base.group_multi_company" />
                     <field name="filter_type" invisible="1" />
-                    <field name="company_id" invisible="1" />
                 </group>
                 <group name="main-right">
-                    <group name="export_file" string="Export File" colspan="2">
-                        <field name="config_id" />
-                        <field name="attachment_datas" filename="attachment_name" />
-                        <field name="attachment_id" invisible="1" />
-                        <field name="attachment_name" invisible="1" />
-
-                    </group>
+                    <field name="company_id" groups="base.group_multi_company" />
+                    <field name="company_id" invisible="1" />
+                    <field name="attachment_datas" filename="attachment_name" />
+                    <field name="attachment_id" invisible="1" />
+                    <field name="attachment_name" invisible="1" />
                 </group>
             </group>
             <group name="moves" string="Journal Entries">

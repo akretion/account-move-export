@@ -4,18 +4,18 @@
 
 
 from odoo import _, api, fields, models
-from odoo.exceptions import ValidationError
 
 
 class AccountMoveExportConfig(models.Model):
     _name = "account.move.export.config"
     _description = "Journal Entries Export Configuration"
     _order = "sequence, id"
-    _check_company_auto = True
 
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
     name = fields.Char(required=True, index=True)
+    # The company_id field here is just for filtering, if you want to affect a config
+    # to specific company, nothing more. No _check_company_auto/check_company
     company_id = fields.Many2one(
         "res.company", ondelete="cascade", index=True, required=False
     )
@@ -51,17 +51,10 @@ class AccountMoveExportConfig(models.Model):
     )
     partner_account_ids = fields.Many2many(
         "account.account",
-        compute="_compute_partner_account_ids",
-        store=True,
-        readonly=False,
         string="Accounts with Partner",
-        check_company=True,
-        domain="[('company_id', '=', company_id)]",
     )
     default_journal_ids = fields.Many2many(
         "account.journal",
-        check_company=True,
-        domain="[('company_id', '=', company_id)]",
         string="Default Journals",
     )
     lock = fields.Selection(
@@ -134,60 +127,24 @@ class AccountMoveExportConfig(models.Model):
         ),
     ]
 
-    @api.constrains("company_id", "partner_option", "default_journal_ids")
-    def _check_config(self):
-        for config in self:
-            if not config.company_id:
-                if config.partner_option == "accounts":
-                    raise ValidationError(
-                        _(
-                            "The configuration %s has the partner option set to "
-                            "'Selected Accounts', "
-                            "so it must be linked to a specific company."
-                        )
-                        % config.display_name
-                    )
-                if config.default_journal_ids:
-                    raise ValidationError(
-                        _(
-                            "The configuration '%s' has default journals, so it "
-                            "must be linked to a specific company."
-                        )
-                        % config.display_name
-                    )
+    @api.onchange("partner_option")
+    def partner_option_change(self):
+        if self.partner_option == "accounts" and not self.partner_account_ids:
+            partner_accounts = self.env["account.account"]
+            pay_account = self.env["ir.property"]._get(
+                "property_account_payable_id", "res.partner"
+            )
+            if pay_account:
+                partner_accounts |= pay_account
+            rec_account = self.env["ir.property"]._get(
+                "property_account_receivable_id", "res.partner"
+            )
+            if rec_account:
+                partner_accounts |= rec_account
 
-    @api.depends("partner_option", "company_id")
-    def _compute_partner_account_ids(self):
-        for config in self:
-            if (
-                config.partner_option == "accounts"
-                and config.company_id
-                and not config.partner_account_ids
-            ):
-                account_ids = []
-                # There is no method on ir.property to get a prop
-                # with a specific company and not self.env.company
-                for field_name in [
-                    "property_account_receivable_id",
-                    "property_account_payable_id",
-                ]:
-                    field_id = (
-                        self.env["ir.model.fields"]._get("res.partner", field_name).id
-                    )
-                    domain = [
-                        ("company_id", "=", self.company_id.id),
-                        ("fields_id", "=", field_id),
-                        ("res_id", "=", False),
-                        ("value_reference", "=like", "account.account,%"),
-                    ]
-                    prop = (
-                        self.env["ir.property"]
-                        .sudo()
-                        .search_read(domain, ["value_reference"], limit=1)
-                    )
-                    if prop:
-                        account_ids.append(int(prop[0]["value_reference"][16:]))
-                config.partner_account_ids = [(6, 0, account_ids)]
+            self.partner_account_ids = partner_accounts
+        if self.partner_option != "accounts":
+            self.partner_account_ids = False
 
 
 class AccountMoveExportConfigColumn(models.Model):

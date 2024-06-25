@@ -31,8 +31,6 @@
             <group name="main-left">
                         <field name="file_format" />
                         <field name="active" invisible="1" />
-                        <field name="company_id" groups="base.group_multi_company" />
-                         <field name="company_id" invisible="1" />
 
                         <field
                             name="header_line"
@@ -46,6 +44,8 @@
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
                         />
                         <field name="lock" widget="radio" />
+                        <field name="company_id" groups="base.group_multi_company" />
+                        <field name="company_id" invisible="1" />
             </group>
             <group name="main-right">
                 <group name="default_values" string="Default Values" colspan="2">

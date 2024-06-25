@@ -103,9 +103,11 @@ class AccountMoveExport(models.Model):
             ("posted", "All Posted Entries"),
             ("all", "Draft and Posted Entries"),
         ],
+        compute="_compute_target_move",
+        store=True,
+        readonly=False,
         string="Target Journal Entries",
         required=True,
-        default="posted",
         tracking=True,
         states={"done": [("readonly", True)]},
     )
@@ -169,6 +171,12 @@ class AccountMoveExport(models.Model):
                 ]
             else:
                 export.journal_ids = False
+
+    @api.depends("config_id")
+    def _compute_target_move(self):
+        for export in self:
+            if export.config_id:
+                export.target_move = export.config_id.default_target_move
 
     @api.depends("date_range_id")
     def _compute_dates(self):

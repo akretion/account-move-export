@@ -57,6 +57,14 @@ class AccountMoveExportConfig(models.Model):
         "account.journal",
         string="Default Journals",
     )
+    default_target_move = fields.Selection(
+        [
+            ("posted", "All Posted Entries"),
+            ("all", "Draft and Posted Entries"),
+        ],
+        string="Default Target Journal Entries",
+        default="posted",
+    )
     lock = fields.Selection(
         [
             ("no", "No"),

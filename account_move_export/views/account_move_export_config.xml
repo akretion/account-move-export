@@ -45,14 +45,19 @@
                             widget="many2many_tags"
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
                         />
-                        <field name="default_journal_ids" widget="many2many_tags" />
                         <field name="lock" widget="radio" />
             </group>
-            <group
-                        name="csv"
-                        attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                        string="CSV configuration"
-                    >
+            <group name="main-right">
+                <group name="default_values" string="Default Values" colspan="2">
+                        <field name="default_journal_ids" widget="many2many_tags" />
+                        <field name="default_target_move" widget="radio" />
+                </group>
+                <group
+                            name="csv"
+                            attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
+                            string="CSV configuration"
+                            colspan="2"
+                        >
                         <field name="date_format" />
                         <field name="encoding" />
                         <field name="delimiter" />
@@ -61,11 +66,13 @@
                         <field name="file_extension" />
             </group>
             <group
-                        name="xlsx"
-                        attrs="{'invisible': [('file_format', '!=', 'xlsx_generic')]}"
-                        string="XLSX configuration"
-                    >
+                            name="xlsx"
+                            attrs="{'invisible': [('file_format', '!=', 'xlsx_generic')]}"
+                            string="XLSX configuration"
+                            colspan="2"
+                        >
                 <field name="xlsx_font_size" />
+            </group>
             </group>
         </group>
         <group name="columns" string="Columns">

@@ -162,6 +162,8 @@ class AccountMoveExportConfigColumn(models.Model):
         store=True,
         readonly=False,
     )
+    # BIG FAT WARNING: don't share the compute method between 2 stored field
+    # with one being readonly=True and the other being readonly=False
     field_type = fields.Selection(
         [
             ("date", "Date"),
@@ -174,7 +176,7 @@ class AccountMoveExportConfigColumn(models.Model):
         store=True,
     )
     excel_width = fields.Integer(
-        compute="_compute_field_type", store=True, readonly=False
+        compute="_compute_excel_width", store=True, readonly=False
     )
 
     _sql_constraints = [
@@ -186,34 +188,138 @@ class AccountMoveExportConfigColumn(models.Model):
     ]
 
     @api.model
-    def _field_selection(self):
-        res = [
-            ("empty", _("Empty")),
-            ("entry_number", _("Entry Number")),
-            ("date", _("Date")),
-            ("journal_code", _("Journal Code")),
-            ("account_code", _("Account Code")),
-            ("account_name", _("Account Name")),
-            ("partner_code", _("Partner Code")),
-            ("partner_name", _("Partner Name")),
-            ("analytic_account_code", _("Analytic Account Code")),
-            ("analytic_account_name", _("Analytic Account Name")),
-            ("item_label", _("Journal Item Label")),
-            ("debit", _("Debit")),
-            ("credit", _("Credit")),
-            ("balance", _("Balance (Debit - Credit)")),
-            ("entry_ref", _("Journal Entry Ref")),
-            ("reconcile_ref", _("Reconcile Ref")),
-            ("due_date", _("Due Date")),
-            ("origin_currency_amount", _("Origin Currency Amount")),
-            ("origin_currency_code", _("Origin Currency Code")),
-        ]
+    def _prepare_field_dict(self):
+        fielddict = {
+            "empty": {"label": _("Empty"), "sequence": 10, "width": 5, "type": "char"},
+            "entry_number": {
+                "label": _("Entry Number"),
+                "sequence": 20,
+                "width": 14,
+                "type": "char",
+            },
+            "date": {"label": _("Date"), "sequence": 30, "width": 10, "type": "date"},
+            "journal_code": {
+                "label": _("Journal Code"),
+                "sequence": 40,
+                "width": 11,
+                "type": "char",
+            },
+            "account_code": {
+                "label": _("Account Code"),
+                "sequence": 50,
+                "width": 11,
+                "type": "char",
+            },
+            "account_name": {
+                "label": _("Account Name"),
+                "sequence": 60,
+                "width": 30,
+                "type": "char",
+            },
+            "partner_code": {
+                "label": _("Partner Code"),
+                "sequence": 70,
+                "width": 11,
+                "type": "char",
+            },
+            "partner_name": {
+                "label": _("Partner Name"),
+                "sequence": 80,
+                "width": 30,
+                "type": "char",
+            },
+            "analytic_account_code": {
+                "label": _("Analytic Account Code"),
+                "sequence": 90,
+                "width": 11,
+                "type": "char",
+            },
+            "analytic_account_name": {
+                "label": _("Analytic Account Name"),
+                "sequence": 100,
+                "width": 30,
+                "type": "char",
+            },
+            "item_label": {
+                "label": _("Journal Item Label"),
+                "sequence": 110,
+                "width": 50,
+                "type": "char",
+            },
+            "debit": {
+                "label": _("Debit"),
+                "sequence": 120,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "credit": {
+                "label": _("Credit"),
+                "sequence": 130,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "balance": {
+                "label": _("Balance (Debit - Credit)"),
+                "sequence": 140,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "entry_ref": {
+                "label": _("Journal Entry Ref"),
+                "sequence": 150,
+                "width": 20,
+                "type": "char",
+            },
+            "reconcile_ref": {
+                "label": _("Reconcile Ref"),
+                "sequence": 160,
+                "width": 20,
+                "type": "char",
+            },
+            "due_date": {
+                "label": _("Due Date"),
+                "sequence": 170,
+                "width": 10,
+                "type": "date",
+            },
+            "origin_currency_amount": {
+                "label": _("Origin Currency Amount"),
+                "sequence": 180,
+                "width": 12,
+                "type": "float",
+            },
+            "origin_currency_code": {
+                "label": _("Origin Currency Code"),
+                "sequence": 190,
+                "width": 9,
+                "type": "char",
+            },
+        }
         line_obj = self.env["account.move.line"]
         if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
-            res += [
-                ("start_date", _("Start Date")),
-                ("end_date", _("End Date")),
-            ]
+            fielddict.update(
+                {
+                    "start_date": {
+                        "label": _("Start Date"),
+                        "sequence": 200,
+                        "width": 10,
+                        "type": "date",
+                    },
+                    "end_date": {
+                        "label": _("End Date"),
+                        "sequence": 210,
+                        "width": 10,
+                        "type": "date",
+                    },
+                }
+            )
+        return fielddict
+
+    @api.model
+    def _field_selection(self):
+        fielddict = self._prepare_field_dict()
+        tmp_list = sorted(fielddict.items(), key=lambda x: x[1]["sequence"])
+        res = [(key, vals["label"]) for (key, vals) in tmp_list]
         return res
 
     @api.depends("field")
@@ -226,33 +332,20 @@ class AccountMoveExportConfigColumn(models.Model):
 
     @api.depends("field")
     def _compute_field_type(self):
-        cols = {
-            "entry_number": {"width": 14, "type": "char"},
-            "date": {"width": 10, "type": "date"},
-            "journal_code": {"width": 11, "type": "char"},
-            "account_code": {"width": 11, "type": "char"},
-            "account_name": {"width": 30, "type": "char"},
-            "analytic_account_code": {"width": 11, "type": "char"},
-            "analytic_account_name": {"width": 30, "type": "char"},
-            "partner_code": {"width": 11, "type": "char"},
-            "partner_name": {"width": 30, "type": "char"},
-            "item_label": {"width": 50, "type": "char"},
-            "debit": {"width": 12, "type": "company_currency"},
-            "credit": {"width": 12, "type": "company_currency"},
-            "entry_ref": {"width": 20, "type": "char"},
-            "reconcile_ref": {"width": 10, "type": "char"},
-            "due_date": {"width": 10, "type": "date"},
-            "origin_currency_amount": {"width": 12, "type": "float"},
-            "origin_currency_code": {"width": 9, "type": "char"},
-            "empty": {"width": 5, "type": "char"},
-        }
+        fielddict = self._prepare_field_dict()
         for column in self:
             field_type = False
+            if column.field:
+                field_type = fielddict.get(column.field, {}).get("type", "char")
+            column.field_type = field_type
+
+    @api.depends("field")
+    def _compute_excel_width(self):
+        fielddict = self._prepare_field_dict()
+        for column in self:
             width = 0
             if column.field:
-                field_type = cols.get(column.field, {}).get("type", "char")
-                width = cols.get(column.field, {}).get("width", 20)
-            column.field_type = field_type
+                width = fielddict.get(column.field, {}).get("width", 20)
             column.excel_width = width
 
     def _compute_display_name(self):

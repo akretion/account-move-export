@@ -443,7 +443,7 @@ msgstr "Filtres"
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__float
 msgid "Float"
-msgstr "Nom décimal"
+msgstr "Nombre décimal"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_follower_ids

@@ -90,6 +90,10 @@ class AccountMoveExport(models.Model):
     )
     journal_ids = fields.Many2many(
         "account.journal",
+        compute="_compute_journal_ids",
+        store=True,
+        precompute=True,
+        readonly=False,
         string="Journals",
         check_company=True,
         required=False,
@@ -102,9 +106,12 @@ class AccountMoveExport(models.Model):
             ("posted", "All Posted Entries"),
             ("all", "Draft and Posted Entries"),
         ],
+        compute="_compute_target_move",
+        store=True,
+        precompute=True,
+        readonly=False,
         string="Target Journal Entries",
         required=True,
-        default="posted",
         tracking=True,
         states={"done": [("readonly", True)]},
     )
@@ -152,6 +159,28 @@ class AccountMoveExport(models.Model):
                 [("company_id", "=", False)], limit=1
             )
         return config
+
+    @api.depends("config_id", "company_id")
+    def _compute_journal_ids(self):
+        for export in self:
+            if (
+                export.company_id
+                and export.config_id
+                and export.config_id.default_journal_ids
+            ):
+                export.journal_ids = [
+                    j.id
+                    for j in export.config_id.default_journal_ids
+                    if j.company_id.id == export.company_id.id
+                ]
+            else:
+                export.journal_ids = False
+
+    @api.depends("config_id")
+    def _compute_target_move(self):
+        for export in self:
+            if export.config_id:
+                export.target_move = export.config_id.default_target_move
 
     @api.depends("date_range_id")
     def _compute_dates(self):
@@ -304,9 +333,15 @@ class AccountMoveExport(models.Model):
             "cols": self._prepare_columns(),
         }
         if self.config_id.analytic_option == "plan_filter":
-            export_options["analytic_plan_ids"] = self.config_id.analytic_plan_ids.ids
+            export_options[
+                "analytic_plan_ids"
+            ] = self.config_id.analytic_plan_ids.filtered(
+                lambda x: x.company_id.id == self.company_id.id
+            ).ids
         if self.config_id.partner_option == "accounts":
-            if not self.config_id.partner_account_ids:
+            if not self.config_id.partner_account_ids.filtered(
+                lambda x: x.company_id.id == self.company_id.id
+            ):
                 raise UserError(
                     _(
                         "As you chose 'Selected Accounts' as 'Partner Option', "
@@ -316,7 +351,9 @@ class AccountMoveExport(models.Model):
                 )
             export_options[
                 "partner_account_ids"
-            ] = self.config_id.partner_account_ids.ids
+            ] = self.config_id.partner_account_ids.filtered(
+                lambda x: x.company_id.id == self.company_id.id
+            ).ids
         elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
@@ -544,6 +581,35 @@ class AccountMoveExport(models.Model):
                 "attachment_id": attach.id,
             }
         )
+        self._lock()
+
+    def _lock(self):
+        if self.config_id.lock and self.config_id.lock != "no":
+            if self.date_end:
+                vals = {}
+                self._update_lock_vals("tax_lock_date", vals)
+                if self.config_id.lock in ("period", "fiscalyear"):
+                    self._update_lock_vals("period_lock_date", vals)
+                if self.config_id.lock == "fiscalyear":
+                    self._update_lock_vals("fiscalyear_lock_date", vals)
+                if vals:
+                    self.company_id.sudo().write(vals)
+                    self.message_post(
+                        body=_("Lock date updated to %s.")
+                        % format_date(self.env, self.date_end)
+                    )
+            else:
+                self.message_post(
+                    body=_(
+                        "Lock date <b>not updated</b> because the end date is not set."
+                    )
+                )
+
+    def _update_lock_vals(self, field, vals):
+        if (
+            self.company_id[field] and self.company_id[field] < self.date_end
+        ) or not self.company_id[field]:
+            vals[field] = self.date_end
 
     def button_account_move_fullscreen(self):
         self.ensure_one()

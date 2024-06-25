@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-16 23:13+0000\n"
-"PO-Revision-Date: 2024-05-16 23:13+0000\n"
+"POT-Creation-Date: 2024-06-25 15:15+0000\n"
+"PO-Revision-Date: 2024-06-25 15:15+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -108,6 +108,7 @@ msgstr "Tous"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__target_move__posted
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__default_target_move__posted
 msgid "All Posted Entries"
 msgstr "Écritures comptabilisées seulement"
 
@@ -124,7 +125,7 @@ msgstr "Un export portant le même nom existe déjà."
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__xlsx_analytic_bg_color
 msgid "Analytic Background Color"
-msgstr "Couleur d'arrière-plan pour l'analytique"
+msgstr "Couleur de fond pour l'analytique"
 
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_analytic_line
@@ -323,6 +324,21 @@ msgid "Decimal Separator"
 msgstr "Séparateur décimal"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_journal_ids
+msgid "Default Journals"
+msgstr "Journaux par défaut"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_target_move
+msgid "Default Target Journal Entries"
+msgstr "Écritures cibles par défaut"
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "Default Values"
+msgstr "Valeurs par défaut"
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__display_name
@@ -344,6 +360,7 @@ msgstr "Brouillon"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__target_move__all
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__default_target_move__all
 msgid "Draft and Posted Entries"
 msgstr "Écritures brouillon et comptabilisées"
 
@@ -381,8 +398,8 @@ msgid ""
 "Enter the analytic background color as an hexadecimal color code that start "
 "with #."
 msgstr ""
-"Saisissez la couleur d'arrière-plan pour les lignes analytiques sous la "
-"forme d'un code de couleur hexadécimal commençant par #."
+"Entrer la couleur de fond pour l'analytique sous forme d'un code couleur "
+"hexadécimal qui commence par #."
 
 #. module: account_move_export
 #. odoo-python
@@ -405,7 +422,6 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_datas
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
 msgid "Export File"
 msgstr "Fichier d'export"
 
@@ -452,14 +468,9 @@ msgid "Filter Type"
 msgstr "Type de filtre"
 
 #. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Filters"
-msgstr "Filtres"
-
-#. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__float
 msgid "Float"
-msgstr "Nom décimal"
+msgstr "Nombre décimal"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_follower_ids
@@ -504,7 +515,7 @@ msgstr "Obtenir les pièces comptables"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__has_message
 msgid "Has Message"
-msgstr "A un message"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__header_label
@@ -629,6 +640,13 @@ msgid "Journal Items"
 msgstr "Écritures comptables"
 
 #. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Journal Name"
+msgstr "Nom du journal"
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids
 msgid "Journals"
 msgstr "Journaux"
@@ -656,6 +674,37 @@ msgstr "Dernière mise à jour par"
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__write_date
 msgid "Last Updated on"
 msgstr "Dernière mise à jour le"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock
+msgid "Lock After Generation"
+msgstr "Verrouiller après génération"
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date <b>not updated</b> because the end date is not set."
+msgstr ""
+"La date de verrouillage <b>n'a pas été mise à jour</b> car la date de fin "
+"n'est pas définie."
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date updated to %s."
+msgstr "Date de verrouillage mise à jour au %s."
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__fiscalyear
+msgid "Lock for All Users"
+msgstr "Verrouillage pour tous les utilisateurs"
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__period
+msgid "Lock for Non-Advisers"
+msgstr "Verrouillage sauf groupe 'Paramétrage facturation'"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_main_attachment_id
@@ -708,7 +757,7 @@ msgstr "Nouveau"
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Prochaine activité du calendrier"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__activity_date_deadline
@@ -727,6 +776,7 @@ msgstr "Type de l'activité suivante"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__analytic_option__no
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__no
 msgid "No"
 msgstr "Non"
 
@@ -760,7 +810,7 @@ msgstr "Nombre d'erreurs"
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_needaction_counter
 msgid "Number of messages requiring action"
-msgstr "Nombre de messages nécessitant une action"
+msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,help:account_move_export.field_account_move_export__message_has_error_counter
@@ -891,37 +941,19 @@ msgid "Target Journal Entries"
 msgstr "Écritures cibles"
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax
+msgid "Tax Lock"
+msgstr "Verrouillage des taxes"
+
+#. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #, python-format
 msgid ""
 "The Analytic Background Color '%s' is not a valid hexadecimal color code."
 msgstr ""
-"La couleur d'arrière-plan pour les lignes analytiques '%s' n'est pas un code"
-" de couleur hexadécimal valide."
-
-#. module: account_move_export
-#. odoo-python
-#: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
-msgid ""
-"The configuration %s has the analytic option set to 'Yes, but only selected "
-"plans', so it must be linked to a specific company."
-msgstr ""
-"Dans la configuration %s, l'option plan analytique est réglée sur \"Oui, "
-"mais seulement pour les plans sélectionnés\" ; elle doit donc être liée à "
-"une société spécifique."
-
-#. module: account_move_export
-#. odoo-python
-#: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
-msgid ""
-"The configuration %s has the partner option set to 'Selected Accounts', so "
-"it must be linked to a specific company."
-msgstr ""
-"Dans la configuration %s, l'option partenaire est définie sur \"Comptes "
-"sélectionnés\" ; elle doit donc être liée à une société spécifique."
+"La couleur de fond pour l'analytique '%s' n'est pas un code couleur "
+"hexadécimal valide."
 
 #. module: account_move_export
 #. odoo-python

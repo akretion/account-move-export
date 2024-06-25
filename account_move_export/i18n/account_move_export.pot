@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-16 23:12+0000\n"
-"PO-Revision-Date: 2024-05-16 23:12+0000\n"
+"POT-Creation-Date: 2024-06-25 15:14+0000\n"
+"PO-Revision-Date: 2024-06-25 15:14+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -106,6 +106,7 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__target_move__posted
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__default_target_move__posted
 msgid "All Posted Entries"
 msgstr ""
 
@@ -316,6 +317,21 @@ msgid "Decimal Separator"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_journal_ids
+msgid "Default Journals"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__default_target_move
+msgid "Default Target Journal Entries"
+msgstr ""
+
+#. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "Default Values"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__display_name
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__display_name
@@ -337,6 +353,7 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export__target_move__all
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__default_target_move__all
 msgid "Draft and Posted Entries"
 msgstr ""
 
@@ -396,7 +413,6 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__attachment_datas
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
 msgid "Export File"
 msgstr ""
 
@@ -440,11 +456,6 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__filter_type
 msgid "Filter Type"
-msgstr ""
-
-#. module: account_move_export
-#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
-msgid "Filters"
 msgstr ""
 
 #. module: account_move_export
@@ -620,6 +631,13 @@ msgid "Journal Items"
 msgstr ""
 
 #. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Journal Name"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids
 msgid "Journals"
 msgstr ""
@@ -646,6 +664,35 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__write_date
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new__write_date
 msgid "Last Updated on"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock
+msgid "Lock After Generation"
+msgstr ""
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date <b>not updated</b> because the end date is not set."
+msgstr ""
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export.py:0
+#, python-format
+msgid "Lock date updated to %s."
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__fiscalyear
+msgid "Lock for All Users"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__period
+msgid "Lock for Non-Advisers"
 msgstr ""
 
 #. module: account_move_export
@@ -718,6 +765,7 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__analytic_option__no
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__no
 msgid "No"
 msgstr ""
 
@@ -878,29 +926,16 @@ msgid "Target Journal Entries"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax
+msgid "Tax Lock"
+msgstr ""
+
+#. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #, python-format
 msgid ""
 "The Analytic Background Color '%s' is not a valid hexadecimal color code."
-msgstr ""
-
-#. module: account_move_export
-#. odoo-python
-#: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
-msgid ""
-"The configuration %s has the analytic option set to 'Yes, but only selected "
-"plans', so it must be linked to a specific company."
-msgstr ""
-
-#. module: account_move_export
-#. odoo-python
-#: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
-msgid ""
-"The configuration %s has the partner option set to 'Selected Accounts', so "
-"it must be linked to a specific company."
 msgstr ""
 
 #. module: account_move_export

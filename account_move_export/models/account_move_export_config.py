@@ -4,7 +4,7 @@
 
 import re
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -12,11 +12,12 @@ class AccountMoveExportConfig(models.Model):
     _name = "account.move.export.config"
     _description = "Journal Entries Export Configuration"
     _order = "sequence, id"
-    _check_company_auto = True
 
     sequence = fields.Integer(default=10)
     active = fields.Boolean(default=True)
     name = fields.Char(required=True, index=True)
+    # The company_id field here is just for filtering, if you want to affect a config
+    # to specific company, nothing more. No _check_company_auto/check_company
     company_id = fields.Many2one(
         "res.company", ondelete="cascade", index=True, required=False
     )
@@ -52,12 +53,29 @@ class AccountMoveExportConfig(models.Model):
     )
     partner_account_ids = fields.Many2many(
         "account.account",
-        compute="_compute_partner_account_ids",
-        store=True,
-        readonly=False,
         string="Accounts with Partner",
-        check_company=True,
-        domain="[('company_id', '=', company_id)]",
+    )
+    default_journal_ids = fields.Many2many(
+        "account.journal",
+        string="Default Journals",
+    )
+    default_target_move = fields.Selection(
+        [
+            ("posted", "All Posted Entries"),
+            ("all", "Draft and Posted Entries"),
+        ],
+        string="Default Target Journal Entries",
+        default="posted",
+    )
+    lock = fields.Selection(
+        [
+            ("no", "No"),
+            ("tax", "Tax Lock"),
+            ("period", "Lock for Non-Advisers"),
+            ("fiscalyear", "Lock for All Users"),
+        ],
+        default="no",
+        string="Lock After Generation",
     )
     encoding = fields.Selection(
         [
@@ -115,9 +133,7 @@ class AccountMoveExportConfig(models.Model):
     )
     analytic_plan_ids = fields.Many2many(
         "account.analytic.plan",
-        check_company=True,
         string="Analytic Plans to Export",
-        domain="[('company_id', '=', company_id)]",
     )
     xlsx_font_size = fields.Integer(default=10, string="Font Size")
     xlsx_analytic_bg_color = fields.Char(
@@ -140,27 +156,24 @@ class AccountMoveExportConfig(models.Model):
         ),
     ]
 
-    @api.constrains("company_id", "analytic_option", "partner_option")
-    def _check_config(self):
-        for config in self:
-            if config.analytic_option == "plan_filter" and not config.company_id:
-                raise ValidationError(
-                    _(
-                        "The configuration %s has the analytic option set to "
-                        "'Yes, but only selected plans', "
-                        "so it must be linked to a specific company."
-                    )
-                    % config.display_name
-                )
-            if config.partner_option == "accounts" and not config.company_id:
-                raise ValidationError(
-                    _(
-                        "The configuration %s has the partner option set to "
-                        "'Selected Accounts', "
-                        "so it must be linked to a specific company."
-                    )
-                    % config.display_name
-                )
+    @api.onchange("partner_option")
+    def partner_option_change(self):
+        if self.partner_option == "accounts" and not self.partner_account_ids:
+            partner_accounts = self.env["account.account"]
+            pay_account = self.env["ir.property"]._get(
+                "property_account_payable_id", "res.partner"
+            )
+            if pay_account:
+                partner_accounts |= pay_account
+            rec_account = self.env["ir.property"]._get(
+                "property_account_receivable_id", "res.partner"
+            )
+            if rec_account:
+                partner_accounts |= rec_account
+
+            self.partner_account_ids = partner_accounts
+        if self.partner_option != "accounts":
+            self.partner_account_ids = False
 
     @api.constrains("xlsx_analytic_bg_color")
     def _check_xlsx_analytic_bg_color(self):
@@ -177,39 +190,6 @@ class AccountMoveExportConfig(models.Model):
                         )
                         % config.xlsx_analytic_bg_color
                     )
-
-    @api.depends("partner_option", "company_id")
-    def _compute_partner_account_ids(self):
-        for config in self:
-            if (
-                config.partner_option == "accounts"
-                and config.company_id
-                and not config.partner_account_ids
-            ):
-                account_ids = []
-                # There is no method on ir.property to get a prop
-                # with a specific company and not self.env.company
-                for field_name in [
-                    "property_account_receivable_id",
-                    "property_account_payable_id",
-                ]:
-                    field_id = (
-                        self.env["ir.model.fields"]._get("res.partner", field_name).id
-                    )
-                    domain = [
-                        ("company_id", "=", self.company_id.id),
-                        ("fields_id", "=", field_id),
-                        ("res_id", "=", False),
-                        ("value_reference", "=like", "account.account,%"),
-                    ]
-                    prop = (
-                        self.env["ir.property"]
-                        .sudo()
-                        .search_read(domain, ["value_reference"], limit=1)
-                    )
-                    if prop:
-                        account_ids.append(int(prop[0]["value_reference"][16:]))
-                config.partner_account_ids = [Command.set(account_ids)]
 
 
 class AccountMoveExportConfigColumn(models.Model):
@@ -239,9 +219,13 @@ class AccountMoveExportConfigColumn(models.Model):
         ],
         compute="_compute_field_type",
         store=True,
+        precompute=True,
     )
     excel_width = fields.Integer(
-        compute="_compute_field_type", store=True, readonly=False
+        compute="_compute_excel_width",
+        store=True,
+        readonly=False,
+        precompute=True,
     )
 
     _sql_constraints = [
@@ -253,33 +237,138 @@ class AccountMoveExportConfigColumn(models.Model):
     ]
 
     @api.model
-    def _field_selection(self):
-        res = [
-            ("empty", _("Empty")),
-            ("type", _("Type: G for general, A for analytic")),
-            ("entry_number", _("Entry Number")),
-            ("date", _("Date")),
-            ("journal_code", _("Journal Code")),
-            ("account_code", _("Account Code")),
-            ("account_name", _("Account Name")),
-            ("partner_code", _("Partner Code")),
-            ("partner_name", _("Partner Name")),
-            ("item_label", _("Journal Item Label")),
-            ("debit", _("Debit")),
-            ("credit", _("Credit")),
-            ("balance", _("Balance (Debit - Credit)")),
-            ("entry_ref", _("Journal Entry Ref")),
-            ("reconcile_ref", _("Reconcile Ref")),
-            ("due_date", _("Due Date")),
-            ("origin_currency_amount", _("Origin Currency Amount")),
-            ("origin_currency_code", _("Origin Currency Code")),
-        ]
+    def _prepare_field_dict(self):
+        fielddict = {
+            "empty": {"label": _("Empty"), "sequence": 10, "width": 5, "type": "char"},
+            "type": {
+                "label": _("Type: G for general, A for analytic"),
+                "sequence": 15,
+                "width": 4,
+                "type": "char",
+            },
+            "entry_number": {
+                "label": _("Entry Number"),
+                "sequence": 20,
+                "width": 14,
+                "type": "char",
+            },
+            "date": {"label": _("Date"), "sequence": 30, "width": 10, "type": "date"},
+            "journal_code": {
+                "label": _("Journal Code"),
+                "sequence": 40,
+                "width": 11,
+                "type": "char",
+            },
+            "journal_name": {
+                "label": _("Journal Name"),
+                "sequence": 45,
+                "width": 25,
+                "type": "char",
+            },
+            "account_code": {
+                "label": _("Account Code"),
+                "sequence": 50,
+                "width": 11,
+                "type": "char",
+            },
+            "account_name": {
+                "label": _("Account Name"),
+                "sequence": 60,
+                "width": 30,
+                "type": "char",
+            },
+            "partner_code": {
+                "label": _("Partner Code"),
+                "sequence": 70,
+                "width": 11,
+                "type": "char",
+            },
+            "partner_name": {
+                "label": _("Partner Name"),
+                "sequence": 80,
+                "width": 30,
+                "type": "char",
+            },
+            "item_label": {
+                "label": _("Journal Item Label"),
+                "sequence": 110,
+                "width": 50,
+                "type": "char",
+            },
+            "debit": {
+                "label": _("Debit"),
+                "sequence": 120,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "credit": {
+                "label": _("Credit"),
+                "sequence": 130,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "balance": {
+                "label": _("Balance (Debit - Credit)"),
+                "sequence": 140,
+                "width": 12,
+                "type": "company_currency",
+            },
+            "entry_ref": {
+                "label": _("Journal Entry Ref"),
+                "sequence": 150,
+                "width": 20,
+                "type": "char",
+            },
+            "reconcile_ref": {
+                "label": _("Reconcile Ref"),
+                "sequence": 160,
+                "width": 20,
+                "type": "char",
+            },
+            "due_date": {
+                "label": _("Due Date"),
+                "sequence": 170,
+                "width": 10,
+                "type": "date",
+            },
+            "origin_currency_amount": {
+                "label": _("Origin Currency Amount"),
+                "sequence": 180,
+                "width": 12,
+                "type": "float",
+            },
+            "origin_currency_code": {
+                "label": _("Origin Currency Code"),
+                "sequence": 190,
+                "width": 9,
+                "type": "char",
+            },
+        }
         line_obj = self.env["account.move.line"]
         if hasattr(line_obj, "start_date") and hasattr(line_obj, "end_date"):
-            res += [
-                ("start_date", _("Start Date")),
-                ("end_date", _("End Date")),
-            ]
+            fielddict.update(
+                {
+                    "start_date": {
+                        "label": _("Start Date"),
+                        "sequence": 200,
+                        "width": 10,
+                        "type": "date",
+                    },
+                    "end_date": {
+                        "label": _("End Date"),
+                        "sequence": 210,
+                        "width": 10,
+                        "type": "date",
+                    },
+                }
+            )
+        return fielddict
+
+    @api.model
+    def _field_selection(self):
+        fielddict = self._prepare_field_dict()
+        tmp_list = sorted(fielddict.items(), key=lambda x: x[1]["sequence"])
+        res = [(key, vals["label"]) for (key, vals) in tmp_list]
         return res
 
     @api.depends("field")
@@ -292,32 +381,20 @@ class AccountMoveExportConfigColumn(models.Model):
 
     @api.depends("field")
     def _compute_field_type(self):
-        cols = {
-            "type": {"width": 4, "type": "char"},
-            "entry_number": {"width": 14, "type": "char"},
-            "date": {"width": 10, "type": "date"},
-            "journal_code": {"width": 11, "type": "char"},
-            "account_code": {"width": 11, "type": "char"},
-            "account_name": {"width": 30, "type": "char"},
-            "partner_code": {"width": 11, "type": "char"},
-            "partner_name": {"width": 30, "type": "char"},
-            "item_label": {"width": 50, "type": "char"},
-            "debit": {"width": 12, "type": "company_currency"},
-            "credit": {"width": 12, "type": "company_currency"},
-            "entry_ref": {"width": 20, "type": "char"},
-            "reconcile_ref": {"width": 10, "type": "char"},
-            "due_date": {"width": 10, "type": "date"},
-            "origin_currency_amount": {"width": 12, "type": "float"},
-            "origin_currency_code": {"width": 9, "type": "char"},
-            "empty": {"width": 5, "type": "char"},
-        }
+        fielddict = self._prepare_field_dict()
         for column in self:
             field_type = False
+            if column.field:
+                field_type = fielddict.get(column.field, {}).get("type", "char")
+            column.field_type = field_type
+
+    @api.depends("field")
+    def _compute_excel_width(self):
+        fielddict = self._prepare_field_dict()
+        for column in self:
             width = 0
             if column.field:
-                field_type = cols.get(column.field, {}).get("type", "char")
-                width = cols.get(column.field, {}).get("width", 20)
-            column.field_type = field_type
+                width = fielddict.get(column.field, {}).get("width", 20)
             column.excel_width = width
 
     def _compute_display_name(self):

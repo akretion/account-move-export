@@ -37,6 +37,7 @@ class AccountAnalyticLine(models.Model):
             "entry_number": move.name,
             "date": self.date,
             "journal_code": self.plan_id.name,
+            "journal_name": self.plan_id.name,
             "account_code": self.account_id.code or self.account_id.name,
             "account_name": self.account_id.name,
             "partner_code": partner_code,

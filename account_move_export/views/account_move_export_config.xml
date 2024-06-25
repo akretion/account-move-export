@@ -31,12 +31,6 @@
 			<group name="main-left">
                         <field name="file_format" />
                         <field name="active" invisible="1" />
-			<field
-                            name="company_id"
-                            groups="base.group_multi_company"
-                            attrs="{'required': ['|', ('partner_option', '=', 'accounts'), ('analytic_option', '=', 'plan_filter')]}"
-                        />
-                         <field name="company_id" invisible="1" />
 
                         <field
                             name="header_line"
@@ -61,12 +55,20 @@
                             widget="many2many_tags"
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
                         />
-			</group>
+                        <field name="lock" widget="radio" />
+                        <field name="company_id" groups="base.group_multi_company" />
+                         <field name="company_id" invisible="1" />
+                 </group>
+                <group name="main-right">
+                <group name="default_values" string="Default Values" colspan="2">
+                        <field name="default_journal_ids" widget="many2many_tags" />
+                        <field name="default_target_move" widget="radio" />
+                </group>
 			<group
-                        name="csv"
-                        attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
-                        string="CSV configuration"
-                    >
+                            name="csv"
+                            attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
+                            string="CSV configuration"
+                        >
                         <field name="date_format" />
                         <field name="encoding" />
                         <field name="delimiter" />
@@ -75,12 +77,13 @@
                         <field name="file_extension" />
 			</group>
 			<group
-                        name="xlsx"
-                        attrs="{'invisible': [('file_format', '!=', 'xlsx_generic')]}"
-                        string="XLSX configuration"
-                    >
+                            name="xlsx"
+                            attrs="{'invisible': [('file_format', '!=', 'xlsx_generic')]}"
+                            string="XLSX configuration"
+                        >
 				<field name="xlsx_font_size" />
 				<field name="xlsx_analytic_bg_color" />
+			</group>
 			</group>
 		</group>
 		<group name="columns" string="Columns">
@@ -115,6 +118,7 @@
                     optional="show"
                     groups="analytic.group_analytic_accounting"
                 />
+                    <field name="lock" optional="show" />
                     <field
                     name="company_id"
                     groups="base.group_multi_company"

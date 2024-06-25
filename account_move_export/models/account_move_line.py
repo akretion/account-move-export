@@ -31,6 +31,7 @@ class AccountMoveLine(models.Model):
             "entry_number": move.name,
             "date": move.date,
             "journal_code": move.journal_id.code,
+            "journal_name": move.journal_id.name,
             "account_code": self.account_id.code,
             "account_name": self.account_id.name,
             "partner_code": partner_code,

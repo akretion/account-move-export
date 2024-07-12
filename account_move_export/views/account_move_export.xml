@@ -69,10 +69,7 @@
                     </h1>
                 </div>
             <group name="main">
-                <group
-                            name="main-left"
-                            attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
-                        >
+                <group name="main-left">
                     <field name="config_id" />
                     <field
                                 name="date_range_id"

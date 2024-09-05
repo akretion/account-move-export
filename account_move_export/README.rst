@@ -29,3 +29,5 @@ To create a new export, you have three options:
 * go to the menu *Accounting > Accounting > Journals > Journal Entries Export* and create a new *account.move.export*,
 * go to the menu *Accounting > Accounting > Journals > Journal Entries*, select the journal entries you would like to export and click on *Action > Export Journal Entries*.
 * go to the menu *Accounting > Accounting > Journals > Journal Items*, select the journal items you would like to export and click on *Action > Export Journal Entries*: if you select just some of the journal items of a journal entry, the whole journal entry will be selected for export with all its lines.
+
+Once the export file has been generated, this module can prepare an email to send to your accounting firm.

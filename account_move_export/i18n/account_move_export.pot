@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-25 15:14+0000\n"
-"PO-Revision-Date: 2024-06-25 15:14+0000\n"
+"POT-Creation-Date: 2024-09-05 22:32+0000\n"
+"PO-Revision-Date: 2024-09-05 22:32+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -42,6 +42,29 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__file_extension___txt
 msgid ".txt"
+msgstr ""
+
+#. module: account_move_export
+#: model:mail.template,body_html:account_move_export.account_move_export_mail_template
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"    Please find enclosed the journal entries of the company <t t-out=\"object.company_id.name\">My Company</t> exported from Odoo. The file contains <t t-out=\"object.move_count\">5</t> journal entries (<t t-out=\"object.move_line_count\">14</t> journal items).\n"
+"        <t t-if=\"object.date_end and not object.date_start\">\n"
+"            It integrates journal entries up to <t t-out=\"format_date(object.date_end)\">2024-09-05</t>.\n"
+"        </t>\n"
+"        <t t-if=\"object.date_end and object.date_start\">\n"
+"            It integrates journal entries from <t t-out=\"format_date(object.date_start)\">2024-08-01</t> to <t t-out=\"format_date(object.date_end)\">2024-08-31</t>.\n"
+"        </t>\n"
+"        <br><br>\n"
+"        Best Regards,\n"
+"        <t t-if=\"not is_html_empty(user.signature)\">\n"
+"            <br><br>\n"
+"            <t t-out=\"user.signature\">-- <br>Mitchell Admin</t>\n"
+"        </t>\n"
+"    </p>\n"
+"</div>\n"
+"    "
 msgstr ""
 
 #. module: account_move_export
@@ -365,6 +388,11 @@ msgid "Due Date"
 msgstr ""
 
 #. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_config_form
+msgid "Email Configuration"
+msgstr ""
+
+#. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #, python-format
@@ -604,6 +632,11 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model,name:account_move_export.model_account_move
 msgid "Journal Entry"
+msgstr ""
+
+#. module: account_move_export
+#: model:mail.template,name:account_move_export.account_move_export_mail_template
+msgid "Journal Entry Export: Send by email"
 msgstr ""
 
 #. module: account_move_export
@@ -882,9 +915,34 @@ msgid "Selected Accounts"
 msgstr ""
 
 #. module: account_move_export
+#: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_form
+msgid "Send by Email"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__send_to_partner_ids
+msgid "Send by Email To"
+msgstr ""
+
+#. module: account_move_export
+#: model:mail.template,description:account_move_export.account_move_export_mail_template
+msgid "Send the journal entry export to the external accounting firm"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__sent
+msgid "Sent"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__sequence
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column__sequence
 msgid "Sequence"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__show_send_button
+msgid "Show Send Button"
 msgstr ""
 
 #. module: account_move_export
@@ -1049,4 +1107,9 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__delimiter__tab
 msgid "tab"
+msgstr ""
+
+#. module: account_move_export
+#: model:mail.template,subject:account_move_export.account_move_export_mail_template
+msgid "{{ object.company_id.name }} - Journal Entry Export {{ object.name }}"
 msgstr ""

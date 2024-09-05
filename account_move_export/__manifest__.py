@@ -18,6 +18,7 @@
         "security/ir_rule.xml",
         "data/ir_sequence.xml",
         "data/account_move_export_config.xml",
+        "data/mail_template.xml",
         "wizards/account_move_export_new_view.xml",
         "views/account_move_export.xml",
         "views/account_move_export_config.xml",

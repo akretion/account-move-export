@@ -148,6 +148,8 @@ class AccountMoveExport(models.Model):
         readonly=True,
         tracking=True,
     )
+    sent = fields.Boolean()
+    show_send_button = fields.Boolean(compute="_compute_show_send_button")
 
     @api.model
     def _default_config_id(self):
@@ -210,6 +212,18 @@ class AccountMoveExport(models.Model):
                     ("display_type", "not in", ("line_section", "line_note")),
                 ]
             )
+
+    @api.depends("sent", "state", "config_id.send_to_partner_ids")
+    def _compute_show_send_button(self):
+        for export in self:
+            show = False
+            if (
+                export.state == "done"
+                and not export.sent
+                and export.config_id.send_to_partner_ids
+            ):
+                show = True
+            export.show_send_button = show
 
     @api.constrains("date_start", "date_end")
     def _check_dates(self):
@@ -639,3 +653,40 @@ class AccountMoveExport(models.Model):
             }
         )
         return action
+
+    def start_mail_composer(self):
+        self.ensure_one()
+        mail_template = self.env.ref(
+            "account_move_export.account_move_export_mail_template"
+        )
+        ctx = {
+            "default_model": self._name,
+            "default_res_id": self.id,
+            "default_use_template": True,
+            "default_template_id": mail_template.id,
+            "default_composition_mode": "comment",
+            "default_email_layout_xmlid": "mail.mail_notification_layout_with_responsible_signature",
+            "default_attachment_ids": [self.attachment_id.id],
+            "mark_export_as_sent": True,
+            "force_email": True,
+        }
+        action = {
+            "type": "ir.actions.act_window",
+            "res_model": "mail.compose.message",
+            "view_mode": "form",
+            "target": "new",
+            "context": ctx,
+        }
+        return action
+
+    @api.returns("mail.message", lambda value: value.id)
+    def message_post(self, **kwargs):
+        if self.env.context.get("mark_export_as_sent"):
+            self.write({"sent": True})
+        return super(
+            AccountMoveExport,
+            self.with_context(
+                mail_post_autofollow=self.env.context.get("mail_post_autofollow", True),
+                lang=self.env.user.lang,
+            ),
+        ).message_post(**kwargs)

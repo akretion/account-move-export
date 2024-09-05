@@ -84,6 +84,9 @@
 				<field name="xlsx_font_size" />
 				<field name="xlsx_analytic_bg_color" />
 			</group>
+                <group name="email" string="Email Configuration" colspan="2">
+                        <field name="send_to_partner_ids" widget="many2many_tags" />
+                </group>
 			</group>
 		</group>
 		<group name="columns" string="Columns">

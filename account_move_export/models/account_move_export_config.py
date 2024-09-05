@@ -142,6 +142,9 @@ class AccountMoveExportConfig(models.Model):
         help="Enter the analytic background color as an hexadecimal color code "
         "that start with #.",
     )
+    send_to_partner_ids = fields.Many2many(
+        "res.partner", string="Send by Email To", domain=[("email", "!=", False)]
+    )
 
     _sql_constraints = [
         (

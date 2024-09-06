@@ -659,13 +659,14 @@ class AccountMoveExport(models.Model):
         mail_template = self.env.ref(
             "account_move_export.account_move_export_mail_template"
         )
+        email_layout_xmlid = "mail.mail_notification_layout_with_responsible_signature"
         ctx = {
             "default_model": self._name,
             "default_res_id": self.id,
             "default_use_template": True,
             "default_template_id": mail_template.id,
             "default_composition_mode": "comment",
-            "default_email_layout_xmlid": "mail.mail_notification_layout_with_responsible_signature",
+            "default_email_layout_xmlid": email_layout_xmlid,
             "default_attachment_ids": [self.attachment_id.id],
             "mark_export_as_sent": True,
             "force_email": True,

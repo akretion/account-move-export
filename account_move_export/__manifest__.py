@@ -24,5 +24,5 @@
         "views/account_move_export_config.xml",
         "views/account_move.xml",
     ],
-    "installable": True,
+    "installable": False,
 }

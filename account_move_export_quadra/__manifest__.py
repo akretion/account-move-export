@@ -12,7 +12,7 @@
     "maintainers": ["hparfr"],
     "website": "https://github.com/akretion/account-move-export",
     "depends": ["account_move_export"],
-    "installable": True,
+    "installable": False,
     "data": [
         "data/account_move_export_quadra_config.xml",
     ],

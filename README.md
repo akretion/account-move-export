@@ -22,7 +22,7 @@ Available addons
 addon | version | maintainers | summary
 --- | --- | --- | ---
 [account_move_export](account_move_export/) | 16.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Export journal entries to specific formats
-[account_move_export_quadra](account_move_export_quadra/) | 16.0.1.0.0 | [![hparfr](https://github.com/hparfr.png?size=30px)](https://github.com/hparfr) | Export journal entries to Quadratus Compta
+[account_move_export_quadra](account_move_export_quadra/) | 16.0.1.1.0 | [![hparfr](https://github.com/hparfr.png?size=30px)](https://github.com/hparfr) | Export journal entries to Quadratus Compta
 
 [//]: # (end addons)
 

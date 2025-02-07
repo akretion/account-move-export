@@ -41,7 +41,7 @@ class AccountMoveLine(models.Model):
             "credit": export_options["company_currency"].round(self.credit),
             "balance": export_options["company_currency"].round(self.balance),
             "entry_ref": move.ref or None,
-            "reconcile_ref": self.full_reconcile_id.name or None,
+            "reconcile_ref": self.matching_number or None,
             "due_date": self.date_maturity or None,
             "origin_currency_amount": self.currency_id.round(self.amount_currency),
             "origin_currency_code": self.currency_id.name,

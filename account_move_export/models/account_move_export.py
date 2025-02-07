@@ -9,10 +9,12 @@ from io import BytesIO, StringIO
 
 from dateutil.relativedelta import relativedelta
 from unidecode import unidecode
+from markupsafe import Markup
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date
+
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +47,6 @@ class AccountMoveExport(models.Model):
             ("custom", "Custom"),
         ],
         required=True,
-        states={"done": [("readonly", True)]},
         default="custom",
     )
     move_ids = fields.One2many(
@@ -53,7 +54,6 @@ class AccountMoveExport(models.Model):
         "account_move_export_id",
         string="Journal Entries",
         check_company=True,
-        states={"done": [("readonly", True)]},
         domain="[('account_move_export_id', '=', False), "
         "('company_id', '=', company_id), ('state', '!=', 'cancel')]",
     )
@@ -67,7 +67,6 @@ class AccountMoveExport(models.Model):
         "date.range",
         check_company=True,
         domain="[('company_id', 'in', (company_id, False))]",
-        states={"done": [("readonly", True)]},
     )
     date_start = fields.Date(
         compute="_compute_dates",
@@ -75,7 +74,6 @@ class AccountMoveExport(models.Model):
         readonly=False,
         precompute=True,
         string="Start Date",
-        states={"done": [("readonly", True)]},
         tracking=True,
     )
     date_end = fields.Date(
@@ -85,7 +83,6 @@ class AccountMoveExport(models.Model):
         precompute=True,
         required=False,
         string="End Date",
-        states={"done": [("readonly", True)]},
         tracking=True,
     )
     journal_ids = fields.Many2many(
@@ -99,7 +96,6 @@ class AccountMoveExport(models.Model):
         required=False,
         domain="[('company_id', '=', company_id)]",
         tracking=True,
-        states={"done": [("readonly", True)]},
     )
     target_move = fields.Selection(
         [
@@ -113,13 +109,11 @@ class AccountMoveExport(models.Model):
         string="Target Journal Entries",
         required=True,
         tracking=True,
-        states={"done": [("readonly", True)]},
     )
     company_id = fields.Many2one(
         "res.company",
         string="Company",
         required=True,
-        states={"done": [("readonly", True)]},
         default=lambda self: self.env.company,
         tracking=True,
     )
@@ -129,7 +123,6 @@ class AccountMoveExport(models.Model):
         required=True,
         check_company=True,
         tracking=True,
-        states={"done": [("readonly", True)]},
         default=lambda self: self._default_config_id(),
         domain="[('company_id', 'in', (False, company_id))]",
     )
@@ -193,17 +186,12 @@ class AccountMoveExport(models.Model):
 
     @api.depends("move_ids")
     def _compute_counts(self):
-        rg_move_res = self.env["account.move"].read_group(
+        rg_move_res = self.env["account.move"]._read_group(
             [("account_move_export_id", "in", self.ids)],
-            ["account_move_export_id"],
-            ["account_move_export_id"],
+            groupby=["account_move_export_id"],
+            aggregates=['__count'],
         )
-        move_data = dict(
-            [
-                (x["account_move_export_id"][0], x["account_move_export_id_count"])
-                for x in rg_move_res
-            ]
-        )
+        move_data = {export.id: move_count for (export, move_count) in rg_move_res}
         for export in self:
             export.move_count = move_data.get(export.id, 0)
             export.move_line_count = self.env["account.move.line"].search_count(
@@ -354,7 +342,7 @@ class AccountMoveExport(models.Model):
             ).ids
         if self.config_id.partner_option == "accounts":
             if not self.config_id.partner_account_ids.filtered(
-                lambda x: x.company_id.id == self.company_id.id
+                lambda x: self.company_id.id in x.company_ids.ids
             ):
                 raise UserError(
                     _(
@@ -366,14 +354,14 @@ class AccountMoveExport(models.Model):
             export_options[
                 "partner_account_ids"
             ] = self.config_id.partner_account_ids.filtered(
-                lambda x: x.company_id.id == self.company_id.id
+                lambda x: self.company_id.id in x.company_ids.ids
             ).ids
         elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
                 .search(
                     [
-                        ("company_id", "=", self.company_id.id),
+                        ("company_ids", "in", self.company_id.id),
                         (
                             "account_type",
                             "in",
@@ -598,26 +586,31 @@ class AccountMoveExport(models.Model):
         self._lock()
 
     def _lock(self):
-        if self.config_id.lock and self.config_id.lock != "no":
-            if self.date_end:
-                vals = {}
-                self._update_lock_vals("tax_lock_date", vals)
-                if self.config_id.lock in ("period", "fiscalyear"):
-                    self._update_lock_vals("period_lock_date", vals)
-                if self.config_id.lock == "fiscalyear":
-                    self._update_lock_vals("fiscalyear_lock_date", vals)
-                if vals:
-                    self.company_id.sudo().write(vals)
-                    self.message_post(
-                        body=_("Lock date updated to %s.")
-                        % format_date(self.env, self.date_end)
-                    )
+        if self.date_end:
+            vals = {}
+            if self.config_id.lock_hard:
+                self._update_lock_vals("hard_lock_date", vals)
+            elif self.config_id.lock_fiscalyear:
+                self._update_lock_vals("fiscalyear_lock_date", vals)
             else:
+                if self.config_id.lock_purchase:
+                    self._update_lock_vals("purchase_lock_date", vals)
+                if self.config_id.lock_sale:
+                    self._update_lock_vals("sale_lock_date", vals)
+                if self.config_id.lock_tax:
+                    self._update_lock_vals("tax_lock_date", vals)
+            if vals:
+                self.company_id.sudo().write(vals)
                 self.message_post(
-                    body=_(
-                        "Lock date <b>not updated</b> because the end date is not set."
-                    )
+                    body=_("Lock date updated to %s.")
+                    % format_date(self.env, self.date_end)
                 )
+        else:
+            self.message_post(
+                body=Markup(_(
+                    "Lock date <b>not updated</b> because the end date is not set."
+                ))
+            )
 
     def _update_lock_vals(self, field, vals):
         if (
@@ -662,7 +655,7 @@ class AccountMoveExport(models.Model):
         email_layout_xmlid = "mail.mail_notification_layout_with_responsible_signature"
         ctx = {
             "default_model": self._name,
-            "default_res_id": self.id,
+            "default_res_ids": self.ids,
             "default_use_template": True,
             "default_template_id": mail_template.id,
             "default_composition_mode": "comment",

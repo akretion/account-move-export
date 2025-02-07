@@ -67,16 +67,11 @@ class AccountMoveExportConfig(models.Model):
         string="Default Target Journal Entries",
         default="posted",
     )
-    lock = fields.Selection(
-        [
-            ("no", "No"),
-            ("tax", "Tax Lock"),
-            ("period", "Lock for Non-Advisers"),
-            ("fiscalyear", "Lock for All Users"),
-        ],
-        default="no",
-        string="Lock After Generation",
-    )
+    lock_tax = fields.Boolean(string='Lock Tax Return')
+    lock_sale = fields.Boolean(string='Lock Sales')
+    lock_purchase = fields.Boolean(string='Lock Purchases')
+    lock_fiscalyear = fields.Boolean(string='Global Lock')
+    lock_hard = fields.Boolean(string='Hard Lock')
     encoding = fields.Selection(
         [
             ("iso8859_15", "ISO-8859-15"),

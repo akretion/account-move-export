@@ -15,7 +15,7 @@
                     name="web_ribbon"
                     title="Archived"
                     bg_color="bg-danger"
-                    attrs="{'invisible': [('active', '=', True)]}"
+                    invisible="active"
                 />
 		<div class="oe_title">
                     <label
@@ -34,7 +34,7 @@
 
                         <field
                             name="header_line"
-                            attrs="{'invisible': [('file_format', 'not in', ('csv_generic', 'xlsx_generic'))]}"
+                            invisible="file_format not in ('csv_generic', 'xlsx_generic')"
                         />
                         <field
                             name="analytic_option"
@@ -46,18 +46,24 @@
                             name="analytic_plan_ids"
                             groups="analytic.group_analytic_accounting"
                             widget="many2many_tags"
-                            attrs="{'invisible': [('analytic_option', '!=', 'plan_filter')], 'required': [('analytic_option', '=', 'plan_filter')]}"
+                            invisible="analytic_option != 'plan_filter'"
+                            required="analytic_option == 'plan_filter'"
                         />
                         <field name="partner_code_field" />
                         <field name="partner_option" widget="radio" />
                         <field
                             name="partner_account_ids"
                             widget="many2many_tags"
-                            attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
+                            required="partner_option == 'accounts'"
+                            invisible="partner_option != 'accounts'"
                         />
-                        <field name="lock" widget="radio" />
+                        <field name="lock_hard" />
+                        <field name="lock_fiscalyear" invisible="lock_hard"/>
+                        <field name="lock_sale" invisible="lock_hard or lock_fiscalyear"/>
+                        <field name="lock_purchase" invisible="lock_hard or lock_fiscalyear"/>
+                        <field name="lock_tax" invisible="lock_hard or lock_fiscalyear"/>
                         <field name="company_id" groups="base.group_multi_company" />
-                         <field name="company_id" invisible="1" />
+                        <field name="company_id" invisible="1" />
                  </group>
                 <group name="main-right">
                 <group name="default_values" string="Default Values" colspan="2">
@@ -66,7 +72,7 @@
                 </group>
 			<group
                             name="csv"
-                            attrs="{'invisible': [('file_format', '!=', 'csv_generic')]}"
+                            invisible="file_format != 'csv_generic'"
                             string="CSV configuration"
                         >
                         <field name="date_format" />
@@ -78,7 +84,7 @@
 			</group>
 			<group
                             name="xlsx"
-                            attrs="{'invisible': [('file_format', '!=', 'xlsx_generic')]}"
+                            invisible="file_format != 'xlsx_generic'"
                             string="XLSX configuration"
                         >
 				<field name="xlsx_font_size" />
@@ -91,16 +97,16 @@
 		</group>
 		<group name="columns" string="Columns">
 			<field name="column_ids" nolabel="1" colspan="2">
-			<tree editable="bottom">
+			<list editable="bottom">
 				<field name="sequence" widget="handle" />
 				<field name="field" />
 				<field name="header_label" />
 				<field name="field_type" optional="hide" />
 				<field
                                 name="excel_width"
-                                attrs="{'column_invisible': [('parent.file_format', '!=', 'xlsx_generic')]}"
+                                column_invisible="parent.file_format != 'xlsx_generic'"
                             />
-			</tree>
+			</list>
 			</field>
 		</group>
         </form>
@@ -110,7 +116,7 @@
 <record id="account_move_export_config_tree" model="ir.ui.view">
     <field name="model">account.move.export.config</field>
     <field name="arch" type="xml">
-            <tree>
+            <list>
                     <field name="sequence" widget="handle" />
                     <field name="name" decoration-bf="1" />
                     <field name="file_format" optional="show" />
@@ -121,13 +127,12 @@
                     optional="show"
                     groups="analytic.group_analytic_accounting"
                 />
-                    <field name="lock" optional="show" />
                     <field
                     name="company_id"
                     groups="base.group_multi_company"
                     optional="show"
                 />
-            </tree>
+            </list>
     </field>
 </record>
 
@@ -152,7 +157,7 @@
 <record id="account_move_export_config_action" model="ir.actions.act_window">
     <field name="name">Journal Entries Exports Configuration</field>
     <field name="res_model">account.move.export.config</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
 </record>
 
 

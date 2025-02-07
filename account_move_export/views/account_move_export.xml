@@ -15,14 +15,14 @@
                     <button
                         name="get_moves"
                         type="object"
-                        attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('filter_type', '!=', 'custom')]}"
+                        invisible="state != 'draft' or filter_type != 'custom'"
                         class="btn-primary"
                         string="Get Journal Entries"
                     />
                     <button
                         name="draft2done"
                         type="object"
-                        states="draft"
+                        invisible="state != 'draft'"
                         class="btn-primary"
                         string="Generate File"
                     />
@@ -30,13 +30,13 @@
                         class="btn-primary"
                         type="object"
                         name="start_mail_composer"
-                        attrs="{'invisible': [('show_send_button', '=', False)]}"
+                        invisible="not show_send_button"
                         string="Send by Email"
                     />
                     <button
                         name="done2draft"
                         type="object"
-                        states="done"
+                        invisible="state != 'done'"
                         confirm="Are you sure you want to go back to draft?"
                         string="Back to Draft"
                     />
@@ -77,35 +77,40 @@
                 </div>
             <group name="main">
                 <group name="main-left">
-                    <field name="config_id" />
+                    <field name="config_id" readonly="state != 'draft'"/>
                     <field
                                 name="date_range_id"
-                                attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
+                                invisible="filter_type != 'custom'"
+                                readonly="state != 'draft'"
                             />
                     <field
                                 name="date_start"
-                                attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
-                                options="{'datepicker': {'warn_future': true}}"
+                                invisible="filter_type != 'custom'"
+                                readonly="state != 'draft'"
+                                options="{'warn_future': true}"
                             />
                     <field
                                 name="date_end"
-                                attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
-                                options="{'datepicker': {'warn_future': true}}"
+                                invisible="filter_type != 'custom'"
+                                readonly="state != 'draft'"
+                                options="{'warn_future': true}"
                             />
                     <field
                                 name="journal_ids"
                                 widget="many2many_tags"
-                                attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
+                                readonly="state != 'draft'"
+                                invisible="filter_type != 'custom'"
                             />
                     <field
                                 name="target_move"
                                 widget="radio"
-                                attrs="{'invisible': [('filter_type', '!=', 'custom')]}"
+                                invisible="filter_type != 'custom'"
+                                readonly="state != 'draft'"
                             />
                     <field name="filter_type" invisible="1" />
                 </group>
                 <group name="main-right">
-                    <field name="company_id" groups="base.group_multi_company" />
+                    <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
                     <field name="company_id" invisible="1" />
                     <field name="attachment_datas" filename="attachment_name" />
                     <field name="attachment_id" invisible="1" />
@@ -117,18 +122,15 @@
             <group name="moves" string="Journal Entries">
                     <field
                             name="move_ids"
+                            readonly="state != 'draft'"
                             widget="many2many"
                             colspan="2"
                             nolabel="1"
-                            context="{'tree_view_ref': 'account.view_move_tree'}"
+                            context="{'list_view_ref': 'account.view_move_tree'}"
                         />
             </group>
             </sheet>
-            <div class="oe_chatter">
-                <field name="message_follower_ids" widget="mail_followers" />
-                <field name="activity_ids" widget="mail_activity" />
-                <field name="message_ids" widget="mail_thread" />
-            </div>
+            <chatter/>
         </form>
     </field>
 </record>
@@ -136,7 +138,7 @@
 <record id="account_move_export_tree" model="ir.ui.view">
     <field name="model">account.move.export</field>
     <field name="arch" type="xml">
-            <tree>
+            <list>
                     <field name="name" decoration-bf="1" />
                     <field name="create_date" optional="show" />
                     <field name="date_start" optional="show" />
@@ -154,7 +156,7 @@
                     decoration-info="state == 'draft'"
                     decoration-success="state == 'done'"
                 />
-            </tree>
+            </list>
     </field>
 </record>
 
@@ -189,15 +191,15 @@
 <record id="account_move_export_action" model="ir.actions.act_window">
     <field name="name">Journal Entries Exports</field>
     <field name="res_model">account.move.export</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
 </record>
 
 
 <menuitem
         id="account_move_export_menu"
         action="account_move_export_action"
-        sequence="15"
-        parent="account.menu_finance_entries_accounting_miscellaneous"
+        sequence="150"
+        parent="account.menu_finance_entries"
     />
 
 

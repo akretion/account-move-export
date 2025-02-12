@@ -30,6 +30,7 @@ class AccountMoveLine(models.Model):
             "type": "G",
             "entry_number": move.name,
             "date": move.date,
+            "invoice_date": move.invoice_date or None,
             "journal_code": move.journal_id.code,
             "journal_name": move.journal_id.name,
             "account_code": self.account_id.code,

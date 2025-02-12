@@ -253,6 +253,7 @@ class AccountMoveExportConfigColumn(models.Model):
                 "type": "char",
             },
             "date": {"label": _("Date"), "sequence": 30, "width": 10, "type": "date"},
+            "invoice_date": {"label": _("Invoice Date"), "sequence": 35, "width": 10, "type": "date"},
             "journal_code": {
                 "label": _("Journal Code"),
                 "sequence": 40,

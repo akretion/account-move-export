@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 16.0\n"
+"Project-Id-Version: Odoo Server 18.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-05 22:32+0000\n"
-"PO-Revision-Date: 2024-09-05 22:32+0000\n"
+"POT-Creation-Date: 2025-04-01 18:21+0000\n"
+"PO-Revision-Date: 2025-04-01 18:21+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -28,7 +28,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/wizards/account_move_export_new.py:0
-#, python-format
 msgid ""
 "%(count)d of the selected journal entries have already been exported: "
 "%(journal_entries)s."
@@ -56,11 +55,11 @@ msgid ""
 "        <t t-if=\"object.date_end and object.date_start\">\n"
 "            It integrates journal entries from <t t-out=\"format_date(object.date_start)\">2024-08-01</t> to <t t-out=\"format_date(object.date_end)\">2024-08-31</t>.\n"
 "        </t>\n"
-"        <br><br>\n"
+"        <br/><br/>\n"
 "        Best Regards,\n"
-"        <t t-if=\"not is_html_empty(user.signature)\">\n"
-"            <br><br>\n"
-"            <t t-out=\"user.signature\">-- <br>Mitchell Admin</t>\n"
+"        <t t-if=\"not is_html_empty(user.signature)\" data-o-mail-quote-container=\"1\">\n"
+"            <br/><br/>\n"
+"            <t t-out=\"user.signature\" data-o-mail-quote=\"1\">-- <br data-o-mail-quote=\"1\"/>Mitchell Admin</t>\n"
 "        </t>\n"
 "    </p>\n"
 "</div>\n"
@@ -75,14 +74,12 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Account Code"
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Account Name"
 msgstr ""
 
@@ -172,7 +169,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid ""
 "As you chose 'Selected Accounts' as 'Partner Option', you must select one or"
 " several accounts for which the partner will be exported."
@@ -196,8 +192,12 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Balance (Debit - Credit)"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__suspense_account_raise
+msgid "Block if Suspense Account is Present"
 msgstr ""
 
 #. module: account_move_export
@@ -213,7 +213,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid ""
 "Cannot delete '%(export)s' because it is in 'done' state. You should set it "
 "back to draft first."
@@ -295,7 +294,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Credit"
 msgstr ""
 
@@ -313,7 +311,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config_column__field_type__date
-#, python-format
 msgid "Date"
 msgstr ""
 
@@ -330,7 +327,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Debit"
 msgstr ""
 
@@ -383,7 +379,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Due Date"
 msgstr ""
 
@@ -395,7 +390,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Empty"
 msgstr ""
 
@@ -409,7 +403,6 @@ msgstr ""
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_end
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
-#, python-format
 msgid "End Date"
 msgstr ""
 
@@ -423,7 +416,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Entry Number"
 msgstr ""
 
@@ -435,7 +427,6 @@ msgstr ""
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_bank_statement_line__account_move_export_id
 #: model:ir.model.fields,field_description:account_move_export.field_account_move__account_move_export_id
-#: model:ir.model.fields,field_description:account_move_export.field_account_payment__account_move_export_id
 msgid "Export"
 msgstr ""
 
@@ -532,6 +523,16 @@ msgid "Get Journal Entries"
 msgstr ""
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock_fiscalyear
+msgid "Global Lock"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock_hard
+msgid "Hard Lock"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__has_message
 msgid "Has Message"
 msgstr ""
@@ -585,6 +586,12 @@ msgid "Include Analytic"
 msgstr ""
 
 #. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+msgid "Invoice Date"
+msgstr ""
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_is_follower
 msgid "Is Follower"
 msgstr ""
@@ -592,7 +599,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Journal Code"
 msgstr ""
 
@@ -642,7 +648,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Journal Entry Ref"
 msgstr ""
 
@@ -654,7 +659,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Journal Item Label"
 msgstr ""
 
@@ -666,21 +670,12 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Journal Name"
 msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids
 msgid "Journals"
-msgstr ""
-
-#. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export____last_update
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config____last_update
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config_column____last_update
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_new____last_update
-msgid "Last Modified on"
 msgstr ""
 
 #. module: account_move_export
@@ -700,37 +695,30 @@ msgid "Last Updated on"
 msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock
-msgid "Lock After Generation"
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock_purchase
+msgid "Lock Purchases"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock_sale
+msgid "Lock Sales"
+msgstr ""
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__lock_tax
+msgid "Lock Tax Return"
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "Lock date <b>not updated</b> because the end date is not set."
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "Lock date updated to %s."
-msgstr ""
-
-#. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__fiscalyear
-msgid "Lock for All Users"
-msgstr ""
-
-#. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__period
-msgid "Lock for Non-Advisers"
-msgstr ""
-
-#. module: account_move_export
-#: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_main_attachment_id
-msgid "Main Attachment"
 msgstr ""
 
 #. module: account_move_export
@@ -751,7 +739,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "Missing configuration on journal entries export '%s'."
 msgstr ""
 
@@ -769,10 +756,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
-#: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "New"
 msgstr ""
 
@@ -798,14 +781,12 @@ msgstr ""
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__analytic_option__no
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__no
 msgid "No"
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "No journal entries to export."
 msgstr ""
 
@@ -841,22 +822,28 @@ msgstr ""
 
 #. module: account_move_export
 #. odoo-python
+#: code:addons/account_move_export/models/account_move_line.py:0
+msgid ""
+"On the export configuration, the option 'Block if Suspense Account is "
+"Present' is enabled. The journal entry %(move)s has the suspense account "
+"'%(account)s'."
+msgstr ""
+
+#. module: account_move_export
+#. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Origin Currency Amount"
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Origin Currency Code"
 msgstr ""
 
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Partner Code"
 msgstr ""
 
@@ -868,7 +855,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Partner Name"
 msgstr ""
 
@@ -890,7 +876,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Reconcile Ref"
 msgstr ""
 
@@ -960,7 +945,6 @@ msgstr ""
 #: code:addons/account_move_export/models/account_move_export_config.py:0
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__date_start
 #: model_terms:ir.ui.view,arch_db:account_move_export.account_move_export_search
-#, python-format
 msgid "Start Date"
 msgstr ""
 
@@ -984,14 +968,8 @@ msgid "Target Journal Entries"
 msgstr ""
 
 #. module: account_move_export
-#: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax
-msgid "Tax Lock"
-msgstr ""
-
-#. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid ""
 "The Analytic Background Color '%s' is not a valid hexadecimal color code."
 msgstr ""
@@ -999,7 +977,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "The end date (%(date_end)s) is before the start date (%(date_start)s)."
 msgstr ""
 
@@ -1011,7 +988,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid "There are no journal entries that matches the criteria."
 msgstr ""
 
@@ -1035,7 +1011,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export_config.py:0
-#, python-format
 msgid "Type: G for general, A for analytic"
 msgstr ""
 
@@ -1057,7 +1032,6 @@ msgstr ""
 #. module: account_move_export
 #. odoo-python
 #: code:addons/account_move_export/models/account_move_export.py:0
-#, python-format
 msgid ""
 "When there is no quoting, the field delimiter and the decimal separator must"
 " be different."

@@ -54,7 +54,8 @@
                             name="partner_account_ids"
                             widget="many2many_tags"
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
-                        />
+                                />
+                        <field name="suspense_account_raise"/>
                         <field name="lock" widget="radio" />
                         <field name="company_id" groups="base.group_multi_company" />
                          <field name="company_id" invisible="1" />

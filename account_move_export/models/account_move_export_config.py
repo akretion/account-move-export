@@ -67,6 +67,8 @@ class AccountMoveExportConfig(models.Model):
         string="Default Target Journal Entries",
         default="posted",
     )
+    suspense_account_raise = fields.Boolean(
+        string="Block if Suspense Account is Present", default=True)
     lock = fields.Selection(
         [
             ("no", "No"),

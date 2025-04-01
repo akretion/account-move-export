@@ -56,7 +56,8 @@
                             widget="many2many_tags"
                             required="partner_option == 'accounts'"
                             invisible="partner_option != 'accounts'"
-                        />
+                                />
+                        <field name="suspense_account_raise"/>
                         <field name="lock_hard" />
                         <field name="lock_fiscalyear" invisible="lock_hard"/>
                         <field name="lock_sale" invisible="lock_hard or lock_fiscalyear"/>

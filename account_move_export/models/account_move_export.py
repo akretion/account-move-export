@@ -371,6 +371,16 @@ class AccountMoveExport(models.Model):
                 )
                 .ids
             )
+        if self.config_id.suspense_account_raise:
+            suspense_account_ids = set()
+            journals = self.env['account.journal'].search_read([
+                ('company_id', '=', self.company_id.id),
+                ('type', 'in', ('bank', 'cash', 'credit')),
+                ('suspense_account_id', '!=', False),
+                ], ['suspense_account_id'])
+            for journal in journals:
+                suspense_account_ids.add(journal['suspense_account_id'][0])
+            export_options['suspense_account_ids'] = list(suspense_account_ids)
         if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
             if (
                 self.config_id.quoting == "none"

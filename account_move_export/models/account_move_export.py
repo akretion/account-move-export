@@ -189,7 +189,7 @@ class AccountMoveExport(models.Model):
         rg_move_res = self.env["account.move"]._read_group(
             [("account_move_export_id", "in", self.ids)],
             groupby=["account_move_export_id"],
-            aggregates=['__count'],
+            aggregates=["__count"],
         )
         move_data = {export.id: move_count for (export, move_count) in rg_move_res}
         for export in self:
@@ -335,11 +335,11 @@ class AccountMoveExport(models.Model):
             "cols": self._prepare_columns(),
         }
         if self.config_id.analytic_option == "plan_filter":
-            export_options[
-                "analytic_plan_ids"
-            ] = self.config_id.analytic_plan_ids.filtered(
-                lambda x: x.company_id.id == self.company_id.id
-            ).ids
+            export_options["analytic_plan_ids"] = (
+                self.config_id.analytic_plan_ids.filtered(
+                    lambda x: x.company_id.id == self.company_id.id
+                ).ids
+            )
         if self.config_id.partner_option == "accounts":
             if not self.config_id.partner_account_ids.filtered(
                 lambda x: self.company_id.id in x.company_ids.ids
@@ -351,11 +351,11 @@ class AccountMoveExport(models.Model):
                         "will be exported."
                     )
                 )
-            export_options[
-                "partner_account_ids"
-            ] = self.config_id.partner_account_ids.filtered(
-                lambda x: self.company_id.id in x.company_ids.ids
-            ).ids
+            export_options["partner_account_ids"] = (
+                self.config_id.partner_account_ids.filtered(
+                    lambda x: self.company_id.id in x.company_ids.ids
+                ).ids
+            )
         elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
@@ -373,14 +373,17 @@ class AccountMoveExport(models.Model):
             )
         if self.config_id.suspense_account_raise:
             suspense_account_ids = set()
-            journals = self.env['account.journal'].search_read([
-                ('company_id', '=', self.company_id.id),
-                ('type', 'in', ('bank', 'cash', 'credit')),
-                ('suspense_account_id', '!=', False),
-                ], ['suspense_account_id'])
+            journals = self.env["account.journal"].search_read(
+                [
+                    ("company_id", "=", self.company_id.id),
+                    ("type", "in", ("bank", "cash", "credit")),
+                    ("suspense_account_id", "!=", False),
+                ],
+                ["suspense_account_id"],
+            )
             for journal in journals:
-                suspense_account_ids.add(journal['suspense_account_id'][0])
-            export_options['suspense_account_ids'] = list(suspense_account_ids)
+                suspense_account_ids.add(journal["suspense_account_id"][0])
+            export_options["suspense_account_ids"] = list(suspense_account_ids)
         if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
             if (
                 self.config_id.quoting == "none"
@@ -502,7 +505,11 @@ class AccountMoveExport(models.Model):
     def _generate_csv_generic(self):
         tmpfile = StringIO()
         export_options = self._prepare_export_options()
-        col_list = [col["header_label"] for col in export_options["cols"]]
+        cols = export_options["cols"]
+        col_list = []
+        for col in cols:
+            col_list.append(col["header_label"])
+        # col_list = [col["header_label"] for col in export_options["cols"]]
         w = csv.DictWriter(
             tmpfile,
             col_list,
@@ -617,9 +624,9 @@ class AccountMoveExport(models.Model):
                 )
         else:
             self.message_post(
-                body=Markup(_(
-                    "Lock date <b>not updated</b> because the end date is not set."
-                ))
+                body=Markup(
+                    _("Lock date <b>not updated</b> because the end date is not set.")
+                )
             )
 
     def _update_lock_vals(self, field, vals):

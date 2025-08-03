@@ -76,6 +76,20 @@ class AccountMoveExport(models.Model):
                 )
                 # * to unpack mline_list
                 print(*mline_list, sep="", file=tmpfile)  # pylint: disable=W8116
+
+                if export_options["analytic_option"] == "all":
+                    alines = mline.analytic_line_ids
+                elif export_options["analytic_option"] == "plan_filter":
+                    alines = mline.analytic_line_ids.filtered(
+                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
+                    )
+                if export_options["analytic_option"] in ("all", "plan_filter"):
+                    for aline in alines:
+                        aline_dict = aline._prepare_account_move_export_line(
+                            export_options
+                        )
+                        row = self._quadra_postprocess_line(aline_dict, export_options)
+                        print(*row, sep="", file=tmpfile)
         return self._quadra_encode(tmpfile, export_options)
 
     def _quadra_postprocess_line(self, ldict, export_options):
@@ -116,41 +130,45 @@ class AccountMoveExport(models.Model):
         return self._csv_encode(data_str, export_options)
 
     def _prepare_columns(self):
-        cols = OrderedDict()
-        # in French to be constistent with the specification
-        # Fichier-d-entree-ascii-dans-quadracompta.pdf
-        cols["Type"] = {"width": 1}
-        cols["Numéro de compte"] = {"width": 8}
-        cols["Code journal"] = {"width": 2}
-        cols["N° folio"] = {"width": 3}  # always 000
-        cols["Date écriture"] = {"width": 6}
-        cols["Code libellé"] = {"width": 1}  # osef
-        cols["Libellé libre"] = {"width": 20}  # osef
-        cols["Sens Débit/Crédit"] = {"width": 1}
-        cols["Signe"] = {"width": 1}
-        cols["Montant en centimes non signé"] = {"width": 12}
-        cols["Compte de contrepartie"] = {"width": 8}  # osef
-        cols["Date échéance"] = {"width": 6}
-        cols["Code lettrage"] = {"width": 2}
-        cols["Code statistiques"] = {"width": 3}  # osef
-        cols["N° de pièce"] = {"width": 5}
-        cols["Code affaire"] = {"width": 10}  # osef
-        cols["Quantité 1"] = {"width": 10}
-        cols["Numéro de pièce"] = {"width": 8}
-        cols["Code devise"] = {"width": 3}
-        cols["Code journal sur 3"] = {"width": 3}
-        cols["Flag Code TVA"] = {"width": 1}  # osef
-        cols["Méthode de calcul TVA"] = {"width": 1}  # osef
-        cols["Code TVA"] = {"width": 1}  # osef
-        cols["Libellé écriture sur 30 caract"] = {"width": 30}
-        cols["Code TVA 2"] = {"width": 3}
-        cols["N° de pièce alphanumérique"] = {"width": 10}
-        cols["Reservé"] = {"width": 10}  # osef
-        cols["Montant dans la devise"] = {"width": 13}  # osef
-        cols["Pièce jointe à l'écriture"] = {"width": 12}  # osef
-        cols["Quantité 2"] = {"width": 10}  # osef
-        cols["NumUniq"] = {"width": 10}  # osef
-        cols["Code opérateur"] = {"width": 4}  # osef
-        cols["Date système"] = {"width": 14}  # osef
+        if self.config_id.name == "Default Quadra Export Configuration":
+            cols = OrderedDict()
+            # in French to be constistent with the specification
+            # Fichier-d-entree-ascii-dans-quadracompta.pdf
+            cols["Type"] = {"width": 1}
+            cols["Numéro de compte"] = {"width": 8}
+            cols["Code journal"] = {"width": 2}
+            cols["N° folio"] = {"width": 3}  # always 000
+            cols["Date écriture"] = {"width": 6}
+            cols["Code libellé"] = {"width": 1}  # osef
+            cols["Libellé libre"] = {"width": 20}  # osef
+            cols["Sens Débit/Crédit"] = {"width": 1}
+            cols["Signe"] = {"width": 1}
+            cols["Montant en centimes non signé"] = {"width": 12}
+            cols["Compte de contrepartie"] = {"width": 8}  # osef
+            cols["Date échéance"] = {"width": 6}
+            cols["Code lettrage"] = {"width": 2}
+            cols["Code statistiques"] = {"width": 3}  # osef
+            cols["N° de pièce"] = {"width": 5}
+            cols["Code affaire"] = {"width": 10}  # osef
+            cols["Quantité 1"] = {"width": 10}
+            cols["Numéro de pièce"] = {"width": 8}
+            cols["Code devise"] = {"width": 3}
+            cols["Code journal sur 3"] = {"width": 3}
+            cols["Flag Code TVA"] = {"width": 1}  # osef
+            cols["Méthode de calcul TVA"] = {"width": 1}  # osef
+            cols["Code TVA"] = {"width": 1}  # osef
+            cols["Libellé écriture sur 30 caract"] = {"width": 30}
+            cols["Code TVA 2"] = {"width": 3}
+            cols["N° de pièce alphanumérique"] = {"width": 10}
+            cols["Reservé"] = {"width": 10}  # osef
+            cols["Montant dans la devise"] = {"width": 13}  # osef
+            cols["Pièce jointe à l'écriture"] = {"width": 12}  # osef
+            cols["Quantité 2"] = {"width": 10}  # osef
+            cols["NumUniq"] = {"width": 10}  # osef
+            cols["Code opérateur"] = {"width": 4}  # osef
+            cols["Date système"] = {"width": 14}  # osef
+            cols["Numero de pièce"] = {"width": 20}  # prio si renseigner
+        else:
+            cols = super()._prepare_columns()
 
         return cols

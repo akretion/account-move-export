@@ -22,6 +22,7 @@ class AccountMoveExport(models.Model):
             attachments = self._quadra_attachments()
             res["attachments"] = attachments
         res["encoding"] = self.config_id.encoding
+        res["cols_analytic"] = self._prepare_columns_analytic()
         return res
 
     def _quadra_attachments(self):
@@ -97,7 +98,10 @@ class AccountMoveExport(models.Model):
         # troncate values and sort columns
         # we use ljust / rjust instead of fstring
         # for better support of older version of python
-        cols = export_options["cols"]
+        if ldict["Type"] == "I":
+            cols = export_options["cols_analytic"]
+        else:
+            cols = export_options["cols"]
         res = []
         for key, constraint in cols.items():
             value = ldict[key]
@@ -170,5 +174,15 @@ class AccountMoveExport(models.Model):
             cols["Numero de pièce"] = {"width": 20}  # prio si renseigner
         else:
             cols = super()._prepare_columns()
+
+        return cols
+
+    def _prepare_columns_analytic(self):
+        cols = OrderedDict()
+        cols["Type"] = {"width": 1}
+        cols["% de la répartition"] = {"width": 5}
+        cols["Montant répartition"] = {"width": 13}
+        cols["Code centre"] = {"width": 10}
+        cols["Code nature"] = {"width": 10}
 
         return cols

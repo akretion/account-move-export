@@ -12,4 +12,11 @@
         <field name="padding">3</field>
         <field name="company_id" eval="False" />
     </record>
+    <record id="seq_account_export_multi" model="ir.sequence">
+        <field name="name">Journal entry export multi</field>
+        <field name="code">account.move.export.multi</field>
+        <field name="prefix">EXP_MULTI</field>
+        <field name="padding">3</field>
+        <field name="company_id" eval="False" />
+    </record>
 </odoo>

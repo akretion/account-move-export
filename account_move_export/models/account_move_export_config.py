@@ -21,6 +21,8 @@ class AccountMoveExportConfig(models.Model):
     company_id = fields.Many2one(
         "res.company", ondelete="cascade", index=True, required=False
     )
+    multi_company = fields.Boolean(default=False)
+
     column_ids = fields.One2many(
         "account.move.export.config.column", "config_id", string="Column Configuration"
     )
@@ -68,12 +70,13 @@ class AccountMoveExportConfig(models.Model):
         default="posted",
     )
     suspense_account_raise = fields.Boolean(
-        string="Block if Suspense Account is Present", default=True)
-    lock_tax = fields.Boolean(string='Lock Tax Return')
-    lock_sale = fields.Boolean(string='Lock Sales')
-    lock_purchase = fields.Boolean(string='Lock Purchases')
-    lock_fiscalyear = fields.Boolean(string='Global Lock')
-    lock_hard = fields.Boolean(string='Hard Lock')
+        string="Block if Suspense Account is Present", default=True
+    )
+    lock_tax = fields.Boolean(string="Lock Tax Return")
+    lock_sale = fields.Boolean(string="Lock Sales")
+    lock_purchase = fields.Boolean(string="Lock Purchases")
+    lock_fiscalyear = fields.Boolean(string="Global Lock")
+    lock_hard = fields.Boolean(string="Hard Lock")
     encoding = fields.Selection(
         [
             ("iso8859_15", "ISO-8859-15"),
@@ -253,7 +256,12 @@ class AccountMoveExportConfigColumn(models.Model):
                 "type": "char",
             },
             "date": {"label": _("Date"), "sequence": 30, "width": 10, "type": "date"},
-            "invoice_date": {"label": _("Invoice Date"), "sequence": 35, "width": 10, "type": "date"},
+            "invoice_date": {
+                "label": _("Invoice Date"),
+                "sequence": 35,
+                "width": 10,
+                "type": "date",
+            },
             "journal_code": {
                 "label": _("Journal Code"),
                 "sequence": 40,
@@ -360,6 +368,17 @@ class AccountMoveExportConfigColumn(models.Model):
                         "sequence": 210,
                         "width": 10,
                         "type": "date",
+                    },
+                }
+            )
+        if self.config_id.multi_company:
+            fielddict.update(
+                {
+                    "company": {
+                        "label": _("Company"),
+                        "sequence": 12,
+                        "width": 20,
+                        "type": "char",
                     },
                 }
             )

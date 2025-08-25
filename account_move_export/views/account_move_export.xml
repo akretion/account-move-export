@@ -25,7 +25,14 @@
                         invisible="state != 'draft'"
                         class="btn-primary"
                         string="Generate File"
-                    />
+                        />
+                    <button
+                        name="draft2done_multi"
+                        type="object"
+                        invisible="state != 'draft'"
+                        class="btn-primary"
+                        string="Generate File Multi-company"
+                        />
                     <button
                         class="btn-primary"
                         type="object"
@@ -111,7 +118,8 @@
                 </group>
                 <group name="main-right">
                     <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
-                    <field name="company_id" invisible="1" />
+                            <field name="company_id" invisible="1" />
+                                          <field name="company_ids" groups="base.group_multi_company" readonly="state != 'draft'" />
                     <field name="attachment_datas" filename="attachment_name" />
                     <field name="attachment_id" invisible="1" />
                     <field name="attachment_name" invisible="1" />

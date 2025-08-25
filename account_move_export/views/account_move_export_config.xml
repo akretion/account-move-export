@@ -65,6 +65,7 @@
                         <field name="lock_tax" invisible="lock_hard or lock_fiscalyear"/>
                         <field name="company_id" groups="base.group_multi_company" />
                         <field name="company_id" invisible="1" />
+                            <field name="multi_company" />
                  </group>
                 <group name="main-right">
                 <group name="default_values" string="Default Values" colspan="2">

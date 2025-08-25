@@ -8,13 +8,12 @@ import logging
 from io import BytesIO, StringIO
 
 from dateutil.relativedelta import relativedelta
-from unidecode import unidecode
 from markupsafe import Markup
+from unidecode import unidecode
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date
-
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +116,10 @@ class AccountMoveExport(models.Model):
         default=lambda self: self.env.company,
         tracking=True,
     )
+    company_ids = fields.Many2many(
+        "res.company",
+        string="Companies",
+    )
     config_id = fields.Many2one(
         "account.move.export.config",
         string="Configuration",
@@ -143,6 +146,9 @@ class AccountMoveExport(models.Model):
     )
     sent = fields.Boolean()
     show_send_button = fields.Boolean(compute="_compute_show_send_button")
+    move_export_multi_id = fields.Many2one(
+        comodel_name="account.move.export.multi", string="Multi company export"
+    )
 
     @api.model
     def _default_config_id(self):
@@ -189,7 +195,7 @@ class AccountMoveExport(models.Model):
         rg_move_res = self.env["account.move"]._read_group(
             [("account_move_export_id", "in", self.ids)],
             groupby=["account_move_export_id"],
-            aggregates=['__count'],
+            aggregates=["__count"],
         )
         move_data = {export.id: move_count for (export, move_count) in rg_move_res}
         for export in self:
@@ -279,6 +285,17 @@ class AccountMoveExport(models.Model):
     def _prepare_columns(self):
         cols = []
         number = 0
+        if self.config_id.multi_company:
+            cols.append(
+                {
+                    "field": "company",
+                    "field_type": "char",
+                    "excel_width": "20",
+                    "header_label": "company",
+                    "number": number,
+                }
+            )
+            number += 1
         for column in self.config_id.column_ids:
             cols.append(
                 {
@@ -335,11 +352,11 @@ class AccountMoveExport(models.Model):
             "cols": self._prepare_columns(),
         }
         if self.config_id.analytic_option == "plan_filter":
-            export_options[
-                "analytic_plan_ids"
-            ] = self.config_id.analytic_plan_ids.filtered(
-                lambda x: x.company_id.id == self.company_id.id
-            ).ids
+            export_options["analytic_plan_ids"] = (
+                self.config_id.analytic_plan_ids.filtered(
+                    lambda x: x.company_id.id == self.company_id.id
+                ).ids
+            )
         if self.config_id.partner_option == "accounts":
             if not self.config_id.partner_account_ids.filtered(
                 lambda x: self.company_id.id in x.company_ids.ids
@@ -351,11 +368,11 @@ class AccountMoveExport(models.Model):
                         "will be exported."
                     )
                 )
-            export_options[
-                "partner_account_ids"
-            ] = self.config_id.partner_account_ids.filtered(
-                lambda x: self.company_id.id in x.company_ids.ids
-            ).ids
+            export_options["partner_account_ids"] = (
+                self.config_id.partner_account_ids.filtered(
+                    lambda x: self.company_id.id in x.company_ids.ids
+                ).ids
+            )
         elif self.config_id.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
@@ -373,14 +390,17 @@ class AccountMoveExport(models.Model):
             )
         if self.config_id.suspense_account_raise:
             suspense_account_ids = set()
-            journals = self.env['account.journal'].search_read([
-                ('company_id', '=', self.company_id.id),
-                ('type', 'in', ('bank', 'cash', 'credit')),
-                ('suspense_account_id', '!=', False),
-                ], ['suspense_account_id'])
+            journals = self.env["account.journal"].search_read(
+                [
+                    ("company_id", "=", self.company_id.id),
+                    ("type", "in", ("bank", "cash", "credit")),
+                    ("suspense_account_id", "!=", False),
+                ],
+                ["suspense_account_id"],
+            )
             for journal in journals:
-                suspense_account_ids.add(journal['suspense_account_id'][0])
-            export_options['suspense_account_ids'] = list(suspense_account_ids)
+                suspense_account_ids.add(journal["suspense_account_id"][0])
+            export_options["suspense_account_ids"] = list(suspense_account_ids)
         if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
             if (
                 self.config_id.quoting == "none"
@@ -408,6 +428,11 @@ class AccountMoveExport(models.Model):
                     "quoting": quote_map.get(self.config_id.quoting),
                 }
             )
+        export_options.update(
+            {
+                "multi_company": self.config_id.multi_company,
+            }
+        )
         return export_options
 
     def _xlsx_prepare_styles(self, workbook, export_options):
@@ -533,6 +558,44 @@ class AccountMoveExport(models.Model):
                         w.writerow(row)
         return self._csv_encode(tmpfile, export_options)
 
+    def _generate_csv_generic_multi(self):
+        tmpfile = StringIO()
+        export_options = self._prepare_export_options()
+        col_list = [col["header_label"] for col in export_options["cols"]]
+        w = csv.DictWriter(
+            tmpfile,
+            col_list,
+            delimiter=export_options["delimiter"],
+            quoting=export_options["quoting"],
+        )
+        if export_options["header_line"]:
+            w.writeheader()
+        for export_move in self.move_export_multi_id.move_export_ids:
+            for move in export_move.move_ids:
+                for mline in move.line_ids.filtered(
+                    lambda x: x.display_type not in ("line_section", "line_note")
+                ):
+                    mline_dict = mline._prepare_account_move_export_line(export_options)
+                    row = export_move._csv_postprocess_line(mline_dict, export_options)
+                    w.writerow(row)
+                    if export_options["analytic_option"] == "all":
+                        alines = mline.analytic_line_ids
+                    elif export_options["analytic_option"] == "plan_filter":
+                        alines = mline.analytic_line_ids.filtered(
+                            lambda x: x.plan_id.id
+                            in export_options["analytic_plan_ids"]
+                        )
+                    if export_options["analytic_option"] in ("all", "plan_filter"):
+                        for aline in alines:
+                            aline_dict = aline._prepare_account_move_export_line(
+                                export_options
+                            )
+                            row = export_move._csv_postprocess_line(
+                                aline_dict, export_options
+                            )
+                            w.writerow(row)
+        return self._csv_encode(tmpfile, export_options)
+
     def _csv_encode(self, tmpfile, export_options):
         tmpfile.seek(0)
         data_str = tmpfile.read()
@@ -547,6 +610,15 @@ class AccountMoveExport(models.Model):
 
     def get_moves(self):
         self.ensure_one()
+        if not self.move_export_multi_id:
+            multi_export = self.env["account.move.export.multi"].create({})
+            self.move_export_multi_id = multi_export.id
+            if self.config_id.multi_company:
+                for company_id in self.company_ids:
+                    news_export = self.copy(
+                        {"company_id": company_id.id, "name": _("New")}
+                    )
+                    news_export.get_moves()
         assert self.filter_type == "custom"
         previous_moves = self.env["account.move"].search(
             [("account_move_export_id", "=", self.id)]
@@ -565,7 +637,7 @@ class AccountMoveExport(models.Model):
         if self.config_id.file_format == "csv_generic":
             ext = self.config_id.file_extension
         else:
-            ext = ".%s" % self.config_id.file_format.split("_")[0]
+            ext = f".{self.config_id.file_format.split('_')[0]}"
         return "".join([self.name.replace("_", "") or "export", ext])
 
     def draft2done(self):
@@ -595,6 +667,30 @@ class AccountMoveExport(models.Model):
         )
         self._lock()
 
+    def draft2done_multi(self):
+        self.ensure_one()
+        if self.move_export_multi_id:
+            for move_export in self.move_export_multi_id.move_export_ids:
+                if move_export.filter_type == "custom" and not move_export.move_ids:
+                    move_export.get_moves()
+                if not move_export.move_ids:
+                    raise UserError(_("No journal entries to export."))
+            data_bytes = self._generate_csv_generic_multi()
+            attach = self.env["ir.attachment"].create(
+                {
+                    "name": self.move_export_multi_id.name + ".csv",
+                    "datas": base64.encodebytes(data_bytes),
+                }
+            )
+            for move_export in self.move_export_multi_id.move_export_ids:
+                move_export.write(
+                    {
+                        "state": "done",
+                        "attachment_id": attach.id,
+                    }
+                )
+                move_export._lock()
+
     def _lock(self):
         if self.date_end:
             vals = {}
@@ -617,9 +713,9 @@ class AccountMoveExport(models.Model):
                 )
         else:
             self.message_post(
-                body=Markup(_(
-                    "Lock date <b>not updated</b> because the end date is not set."
-                ))
+                body=Markup(
+                    _("Lock date <b>not updated</b> because the end date is not set.")
+                )
             )
 
     def _update_lock_vals(self, field, vals):
@@ -694,3 +790,15 @@ class AccountMoveExport(models.Model):
                 lang=self.env.user.lang,
             ),
         ).message_post(**kwargs)
+
+
+class AccountMoveExportMulti(models.Model):
+    _name = "account.move.export.multi"
+
+    name = fields.Char(string="name", require=True, compute="_compute_name_multi")
+    move_export_ids = fields.One2many(
+        comodel_name="account.move.export", inverse_name="move_export_multi_id"
+    )
+
+    def _compute_name_multi(self):
+        self.name = self.env["ir.sequence"].next_by_code("account.move.export.multi")

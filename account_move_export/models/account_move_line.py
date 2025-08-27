@@ -43,7 +43,9 @@ class AccountMoveLine(models.Model):
             )
         if export_options["multi_company"]:
             res = {
-                "company": move.company_id.name,
+                "company": move.company_id.company_registry
+                if move.company_id.company_registry
+                else move.company_id.name,
                 "type": "G",
                 "entry_number": move.name,
                 "date": move.date,

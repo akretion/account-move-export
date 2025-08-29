@@ -10,16 +10,18 @@ class AccuntAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
     def _prepare_account_move_export_line(self, export_options):
-        default = super()._prepare_account_move_export_line(export_options)
-        amount = str(int(self.amount * 100))
+        if export_options["file_format"] in ("txt_quadra", "zip_quadra"):
+            amount = str(abs(int(self.amount * 100)))
 
-        code = str(self.x_plan2_id.code)
-        json_disr = self.move_line_id.analytic_distribution
-        pourcent = str(int(list(json_disr.values())[0] * 100))
-        our = OrderedDict()
-        our["Type"] = "I"
-        our["% de la répartition"] = pourcent
-        our["Montant répartition"] = amount
-        our["Code centre"] = code
-        our["Code nature"] = ""
-        return our
+            code = str(self.x_plan2_id.code)
+            json_disr = self.move_line_id.analytic_distribution
+            pourcent = str(int(list(json_disr.values())[0] * 100))
+            our = OrderedDict()
+            our["Type"] = "I"
+            our["% de la répartition"] = pourcent
+            our["Montant répartition"] = amount
+            our["Code centre"] = code
+            our["Code nature"] = ""
+            return our
+        else:
+            return super()._prepare_account_move_export_line(export_options)

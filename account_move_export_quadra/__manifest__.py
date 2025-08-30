@@ -4,7 +4,7 @@
 
 {
     "name": "Account Move Export Quadra",
-    "version": "16.0.1.0.0",
+    "version": "18.0.1.0.0",
     "category": "Accounting",
     "license": "AGPL-3",
     "summary": "Export journal entries to Quadratus Compta",
@@ -12,7 +12,7 @@
     "maintainers": ["hparfr"],
     "website": "https://github.com/akretion/account-move-export",
     "depends": ["account_move_export"],
-    "installable": False,
+    "installable": True,
     "data": [
         "data/account_move_export_quadra_config.xml",
     ],

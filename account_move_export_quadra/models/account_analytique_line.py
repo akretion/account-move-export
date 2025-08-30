@@ -10,7 +10,7 @@ class AccuntAnalyticLine(models.Model):
     _inherit = "account.analytic.line"
 
     def _prepare_account_move_export_line(self, export_options):
-        if export_options["file_format"] in ("txt_quadra", "zip_quadra"):
+        if "attachemnts" in export_options.keys():
             amount = str(abs(int(self.amount * 100)))
 
             code = str(self.x_plan2_id.code)

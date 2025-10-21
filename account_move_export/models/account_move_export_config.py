@@ -6,6 +6,7 @@ import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+from unidecode import unidecode
 
 
 class AccountMoveExportConfig(models.Model):
@@ -119,19 +120,6 @@ class AccountMoveExportConfig(models.Model):
         default=".csv",
         required=True,
     )
-    analytic_option = fields.Selection(
-        [
-            ("all", "Yes, all plans"),
-            ("plan_filter", "Yes, but only selected plans"),
-            ("no", "No"),
-        ],
-        string="Include Analytic",
-        default="no",
-    )
-    analytic_plan_ids = fields.Many2many(
-        "account.analytic.plan",
-        string="Analytic Plans to Export",
-    )
     xlsx_font_size = fields.Integer(default=10, string="Font Size")
     xlsx_analytic_bg_color = fields.Char(
         string="Analytic Background Color",
@@ -227,6 +215,12 @@ class AccountMoveExportConfigColumn(models.Model):
         readonly=False,
         precompute=True,
     )
+    analytic_plan_id = fields.Many2one(
+        'account.analytic.plan', compute='_compute_analytic_plan_id',
+        store=True, readonly=False, precompute=True)
+    analytic_only = fields.Boolean(
+        compute='_compute_analytic_only', store=True, readonly=False, precompute=True,
+        help="If enabled, the analytic account will be written in this column but not the general account.")
 
     _sql_constraints = [
         (
@@ -372,13 +366,32 @@ class AccountMoveExportConfigColumn(models.Model):
         res = [(key, vals["label"]) for (key, vals) in tmp_list]
         return res
 
-    @api.depends("field")
+    @api.depends('field')
+    def _compute_analytic_plan_id(self):
+        for col in self:
+            if col.field and col.field not in ('account_code', 'account_name'):
+                col.analytic_plan_id = False
+
+    @api.depends('field', 'analytic_plan_id')
+    def _compute_analytic_only(self):
+        for col in self:
+            if col.field:
+                if col.field in ('account_code', 'account_name'):
+                    if not col.analytic_plan_id:
+                        col.analytic_only = False
+                else:
+                    col.analytic_only = False
+
+    @api.depends("field", "analytic_plan_id")
     def _compute_header_label(self):
         for column in self:
+            header_label = False
             if column.field:
-                column.header_label = column.field
-            else:
-                column.header_label = False
+                header_label = column.field
+                if column.field in ('account_code', 'account_name') and column.analytic_plan_id:
+                    plan_header_name = unidecode(column.analytic_plan_id.name.lower().replace(' ', '_'))
+                    header_label = f"{header_label}_{plan_header_name}"
+            column.header_label = header_label
 
     @api.depends("field")
     def _compute_field_type(self):

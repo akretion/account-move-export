@@ -10,6 +10,19 @@ class AccountAnalyticLine(models.Model):
 
     def _prepare_account_move_export_line(self, export_options):
         self.ensure_one()
+        res = {"type": "A"}
+        skip_line = True
+        for plan, ana_field in export_options['analytic_plan2field'].items():
+            if self[ana_field]:
+                skip_line = False
+                res[f'account_code,{plan.id}'] = self[ana_field].code
+                res[f'account_name,{plan.id}'] = self[ana_field].name
+            else:
+                res[f'account_code,{plan.id}'] = None
+                res[f'account_name,{plan.id}'] = None
+        if skip_line:
+            return None
+
         move = self.move_line_id.move_id
         if self.amount > 0:
             credit = export_options["company_currency"].round(self.amount)
@@ -32,19 +45,14 @@ class AccountAnalyticLine(models.Model):
             partner_name = self.partner_id._prepare_account_move_export_partner_name(
                 export_options
             )
-        res = {
-            "type": "A",
+        res.update({
             "entry_number": move.name,
             "date": self.date,
-            "journal_code": self.account_id.plan_id.name,
-            "journal_name": self.account_id.plan_id.name,
-            "account_code": self.account_id.code or self.account_id.name,
-            "account_name": self.account_id.name,
             "partner_code": partner_code,
             "partner_name": partner_name,
             "item_label": self.name or None,
             "debit": debit,
             "credit": credit,
             "balance": export_options["company_currency"].round(self.amount * -1),
-        }
+        })
         return res

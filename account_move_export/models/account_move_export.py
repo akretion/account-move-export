@@ -276,21 +276,31 @@ class AccountMoveExport(models.Model):
             domain.append(("state", "in", ("draft", "posted")))
         return domain
 
-    def _prepare_columns(self):
-        cols = []
+    def _prepare_columns(self, export_options):
         number = 0
         for column in self.config_id.column_ids:
-            cols.append(
-                {
+            col_vals = {
                     "field": column.field,
                     "field_type": column.field_type,
                     "excel_width": column.excel_width,
                     "header_label": column.header_label,
                     "number": number,
                 }
-            )
+            if column.field in ('account_code', 'account_name') and column.analytic_plan_id:
+                plan = column.analytic_plan_id
+                if plan not in export_options['analytic_plan2field']:
+                    field = plan._find_plan_column(model="account.analytic.line")
+                    if not field:
+                        raise UserError(_(
+                            "Odoo could not find the field of the analytic line "
+                            "corresponding to analytic plan '%(plan)s'. "
+                            "This should never happen.", plan=plan.display_name))
+                    export_options['analytic_plan2field'][plan] = field.name
+
+                col_vals['analytic_plan_id'] = column.analytic_plan_id.id
+                col_vals['analytic_only'] = column.analytic_only
+            export_options['cols'].append(col_vals)
             number += 1
-        return cols
 
     def _csv_format_amount(self, amount, export_options):
         if not amount:
@@ -305,6 +315,8 @@ class AccountMoveExport(models.Model):
         row = {}
         for col in export_options["cols"]:
             field = col["field"]
+            if ldict["type"] == "A" and field in ('account_code', 'account_name') and col.get('analytic_plan_id'):
+                field = f"{field},{col['analytic_plan_id']}"
             header = col["header_label"]
             if field in ldict:
                 if not col["field_type"]:
@@ -314,7 +326,7 @@ class AccountMoveExport(models.Model):
                 elif col["field_type"] in ("company_currency", "float"):
                     row[header] = self._csv_format_amount(ldict[field], export_options)
                 else:
-                    row[header] = ldict[field]
+                    row[header] = ldict[field] or ""
         return row
 
     def _prepare_export_options(self):
@@ -331,15 +343,10 @@ class AccountMoveExport(models.Model):
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
-            "analytic_option": self.config_id.analytic_option,
-            "cols": self._prepare_columns(),
+            "cols": [],
+            "analytic_plan2field": {},
         }
-        if self.config_id.analytic_option == "plan_filter":
-            export_options[
-                "analytic_plan_ids"
-            ] = self.config_id.analytic_plan_ids.filtered(
-                lambda x: x.company_id.id == self.company_id.id
-            ).ids
+        self._prepare_columns(export_options)
         if self.config_id.partner_option == "accounts":
             if not self.config_id.partner_account_ids.filtered(
                 lambda x: self.company_id.id in x.company_ids.ids
@@ -466,7 +473,7 @@ class AccountMoveExport(models.Model):
             ):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 for col in cols:
-                    if col["field"] in mline_dict:
+                    if col["field"] in mline_dict and not col.get('analytic_only'):
                         sheet.write(
                             line,
                             col["number"],
@@ -474,25 +481,24 @@ class AccountMoveExport(models.Model):
                             styles[col["field_type"]],
                         )
                 line += 1
-                if export_options["analytic_option"] == "all":
-                    alines = mline.analytic_line_ids
-                elif export_options["analytic_option"] == "plan_filter":
-                    alines = mline.analytic_line_ids.filtered(
-                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
-                    )
-                if export_options["analytic_option"] in ("all", "plan_filter"):
-                    for aline in alines:
+                if export_options["analytic_plan2field"]:
+                    for aline in mline.analytic_line_ids:
                         aline_dict = aline._prepare_account_move_export_line(
                             export_options
                         )
+                        if not aline_dict:
+                            continue
                         for col in cols:
-                            if col["field"] in aline_dict:
-                                sheet.write(
-                                    line,
-                                    col["number"],
-                                    aline_dict[col["field"]],
-                                    styles[f"ana_{col['field_type']}"],
-                                )
+                            if col.get('analytic_plan_id'):
+                                field_key = f"{col['field']},{col['analytic_plan_id']}"
+                            else:
+                                field_key = col["field"]
+                            sheet.write(
+                                line,
+                                col["number"],
+                                aline_dict.get(field_key, '') or '',
+                                styles[f"ana_{col['field_type']}"],
+                            )
                         line += 1
 
         workbook.close()
@@ -518,19 +524,14 @@ class AccountMoveExport(models.Model):
                 mline_dict = mline._prepare_account_move_export_line(export_options)
                 row = self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(row)
-                if export_options["analytic_option"] == "all":
-                    alines = mline.analytic_line_ids
-                elif export_options["analytic_option"] == "plan_filter":
-                    alines = mline.analytic_line_ids.filtered(
-                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
-                    )
-                if export_options["analytic_option"] in ("all", "plan_filter"):
-                    for aline in alines:
+                if export_options["analytic_plan2field"]:
+                    for aline in mline.analytic_line_ids:
                         aline_dict = aline._prepare_account_move_export_line(
                             export_options
                         )
-                        row = self._csv_postprocess_line(aline_dict, export_options)
-                        w.writerow(row)
+                        if aline_dict:
+                            row = self._csv_postprocess_line(aline_dict, export_options)
+                            w.writerow(row)
         return self._csv_encode(tmpfile, export_options)
 
     def _csv_encode(self, tmpfile, export_options):

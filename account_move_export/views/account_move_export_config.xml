@@ -10,68 +10,54 @@
 <record id="account_move_export_config_form" model="ir.ui.view">
     <field name="model">account.move.export.config</field>
     <field name="arch" type="xml">
-	   <form>
-		<widget
+       <form>
+            <widget
                     name="web_ribbon"
                     title="Archived"
                     bg_color="bg-danger"
                     invisible="active"
                 />
-		<div class="oe_title">
-                    <label
+            <div class="oe_title">
+                <label
                         for="name"
                         string="Configuration Name"
                         class="oe_edit_only"
                     />
-                    <h1>
-                        <field name="name" />
-                    </h1>
-                </div>
-		<group name="main">
-			<group name="main-left">
-                        <field name="file_format" />
-                        <field name="active" invisible="1" />
-
-                        <field
-                            name="header_line"
-                            invisible="file_format not in ('csv_generic', 'xlsx_generic')"
+                <h1>
+                    <field name="name" />
+                </h1>
+            </div>
+            <group name="main">
+                <group name="main-left">
+                    <field name="file_format" />
+                    <field name="active" invisible="1" />
+                    <field
+                        name="header_line"
+                        invisible="file_format not in ('csv_generic', 'xlsx_generic')"
+                    />
+                    <field name="partner_code_field" />
+                    <field name="partner_option" widget="radio" />
+                    <field
+                        name="partner_account_ids"
+                        widget="many2many_tags"
+                        required="partner_option == 'accounts'"
+                        invisible="partner_option != 'accounts'"
                         />
-                        <field
-                            name="analytic_option"
-                            groups="analytic.group_analytic_accounting"
-                            widget="radio"
-                        />
-                         <field name="analytic_option" invisible="1" />
-                        <field
-                            name="analytic_plan_ids"
-                            groups="analytic.group_analytic_accounting"
-                            widget="many2many_tags"
-                            invisible="analytic_option != 'plan_filter'"
-                            required="analytic_option == 'plan_filter'"
-                        />
-                        <field name="partner_code_field" />
-                        <field name="partner_option" widget="radio" />
-                        <field
-                            name="partner_account_ids"
-                            widget="many2many_tags"
-                            required="partner_option == 'accounts'"
-                            invisible="partner_option != 'accounts'"
-                                />
-                        <field name="suspense_account_raise"/>
-                        <field name="lock_hard" />
-                        <field name="lock_fiscalyear" invisible="lock_hard"/>
-                        <field name="lock_sale" invisible="lock_hard or lock_fiscalyear"/>
-                        <field name="lock_purchase" invisible="lock_hard or lock_fiscalyear"/>
-                        <field name="lock_tax" invisible="lock_hard or lock_fiscalyear"/>
-                        <field name="company_id" groups="base.group_multi_company" />
-                        <field name="company_id" invisible="1" />
-                 </group>
+                    <field name="suspense_account_raise"/>
+                    <field name="lock_hard" />
+                    <field name="lock_fiscalyear" invisible="lock_hard"/>
+                    <field name="lock_sale" invisible="lock_hard or lock_fiscalyear"/>
+                    <field name="lock_purchase" invisible="lock_hard or lock_fiscalyear"/>
+                    <field name="lock_tax" invisible="lock_hard or lock_fiscalyear"/>
+                    <field name="company_id" groups="base.group_multi_company" />
+                    <field name="company_id" invisible="1" />
+                </group>
                 <group name="main-right">
-                <group name="default_values" string="Default Values" colspan="2">
+                    <group name="default_values" string="Default Values" colspan="2">
                         <field name="default_journal_ids" widget="many2many_tags" />
                         <field name="default_target_move" widget="radio" />
-                </group>
-			<group
+                    </group>
+                    <group
                             name="csv"
                             invisible="file_format != 'csv_generic'"
                             string="CSV configuration"
@@ -82,34 +68,36 @@
                         <field name="decimal_separator" />
                         <field name="quoting" />
                         <field name="file_extension" />
-			</group>
-			<group
+                    </group>
+                    <group
                             name="xlsx"
                             invisible="file_format != 'xlsx_generic'"
                             string="XLSX configuration"
                         >
-				<field name="xlsx_font_size" />
-				<field name="xlsx_analytic_bg_color" />
-			</group>
-                <group name="email" string="Email Configuration" colspan="2">
+                        <field name="xlsx_font_size" />
+                        <field name="xlsx_analytic_bg_color" />
+                    </group>
+                    <group name="email" string="Email Configuration" colspan="2">
                         <field name="send_to_partner_ids" widget="many2many_tags" />
+                    </group>
                 </group>
-			</group>
-		</group>
-		<group name="columns" string="Columns">
-			<field name="column_ids" nolabel="1" colspan="2">
-			<list editable="bottom">
-				<field name="sequence" widget="handle" />
-				<field name="field" />
-				<field name="header_label" />
-				<field name="field_type" optional="hide" />
-				<field
+            </group>
+            <group name="columns" string="Columns">
+                <field name="column_ids" nolabel="1" colspan="2">
+                    <list editable="bottom">
+                        <field name="sequence" widget="handle" />
+                        <field name="field" />
+                        <field name="analytic_plan_id" groups="analytic.group_analytic_accounting" invisible="field not in ('account_name', 'account_code')"/>
+                        <field name="analytic_only" groups="analytic.group_analytic_accounting" invisible="field not in ('account_name', 'account_code')"/>
+                        <field name="header_label" />
+                        <field name="field_type" optional="hide" />
+                        <field
                                 name="excel_width"
                                 column_invisible="parent.file_format != 'xlsx_generic'"
                             />
-			</list>
-			</field>
-		</group>
+                    </list>
+                </field>
+            </group>
         </form>
     </field>
 </record>
@@ -117,23 +105,18 @@
 <record id="account_move_export_config_tree" model="ir.ui.view">
     <field name="model">account.move.export.config</field>
     <field name="arch" type="xml">
-            <list>
-                    <field name="sequence" widget="handle" />
-                    <field name="name" decoration-bf="1" />
-                    <field name="file_format" optional="show" />
-                    <field name="partner_option" optional="show" />
-                    <field name="partner_code_field" optional="show" />
-                    <field
-                    name="analytic_option"
-                    optional="show"
-                    groups="analytic.group_analytic_accounting"
-                />
-                    <field
-                    name="company_id"
-                    groups="base.group_multi_company"
-                    optional="show"
-                />
-            </list>
+        <list>
+            <field name="sequence" widget="handle" />
+            <field name="name" decoration-bf="1" />
+            <field name="file_format" optional="show" />
+            <field name="partner_option" optional="show" />
+            <field name="partner_code_field" optional="show" />
+            <field
+                name="company_id"
+                groups="base.group_multi_company"
+                optional="show"
+            />
+        </list>
     </field>
 </record>
 
@@ -143,14 +126,14 @@
         <search>
             <field name="name" />
             <separator />
-	    <filter string="Archived" name="inactive" domain="[('active', '=', False)]" />
-	    <group name="groupby">
-		    <filter
+            <filter string="Archived" name="inactive" domain="[('active', '=', False)]" />
+            <group name="groupby">
+                <filter
                         name="file_format_groupby"
                         string="File Format"
                         context="{'group_by': 'file_format'}"
                     />
-	    </group>
+            </group>
         </search>
     </field>
 </record>
@@ -160,7 +143,6 @@
     <field name="res_model">account.move.export.config</field>
     <field name="view_mode">list,form</field>
 </record>
-
 
 <menuitem
         id="account_move_export_config_menu"

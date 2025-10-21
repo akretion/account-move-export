@@ -326,7 +326,7 @@ class AccountMoveExport(models.Model):
                 elif col["field_type"] in ("company_currency", "float"):
                     row[header] = self._csv_format_amount(ldict[field], export_options)
                 else:
-                    row[header] = ldict[field] or ""
+                    row[header] = ldict[field]
         return row
 
     def _prepare_export_options(self):

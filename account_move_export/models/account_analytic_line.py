@@ -15,7 +15,7 @@ class AccountAnalyticLine(models.Model):
         for plan, ana_field in export_options['analytic_plan2field'].items():
             if self[ana_field]:
                 skip_line = False
-                res[f'account_code,{plan.id}'] = self[ana_field].code
+                res[f'account_code,{plan.id}'] = self[ana_field].code or self[ana_field].name
                 res[f'account_name,{plan.id}'] = self[ana_field].name
             else:
                 res[f'account_code,{plan.id}'] = None

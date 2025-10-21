@@ -492,20 +492,20 @@ class AccountMoveExport(models.Model):
                     alines = mline.analytic_line_ids.filtered(
                         lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
                     )
-                if export_options["analytic_option"] in ("all", "plan_filter"):
-                    for aline in alines:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
+                else:
+                    alines = []
+                for aline in alines:
+                    aline_dict = aline._prepare_account_move_export_line(
+                        export_options
+                    )
+                    for col in cols:
+                        sheet.write(
+                            line,
+                            col["number"],
+                            aline_dict.get(col["field"], "") or "",
+                            styles[f"ana_{col['field_type']}"],
                         )
-                        for col in cols:
-                            if col["field"] in aline_dict:
-                                sheet.write(
-                                    line,
-                                    col["number"],
-                                    aline_dict[col["field"]],
-                                    styles[f"ana_{col['field_type']}"],
-                                )
-                        line += 1
+                    line += 1
 
         workbook.close()
         out_file.seek(0)

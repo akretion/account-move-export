@@ -4,9 +4,10 @@
 
 import re
 
+from unidecode import unidecode
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from unidecode import unidecode
 
 
 class AccountMoveExportConfig(models.Model):
@@ -56,6 +57,16 @@ class AccountMoveExportConfig(models.Model):
         "account.account",
         string="Accounts with Partner",
     )
+    group_lines = fields.Boolean(
+        help="This option is incompatible with the export of analytic lines."
+    )
+    join_char = fields.Char(
+        default="-",
+        string="Join Character(s)",
+        required=True,
+        help="Character(s) used when joining pieces of text. "
+        "Used for field 'Taxes' and for journal entry labels when grouping is enabled.",
+    )
     default_journal_ids = fields.Many2many(
         "account.journal",
         string="Default Journals",
@@ -69,12 +80,13 @@ class AccountMoveExportConfig(models.Model):
         default="posted",
     )
     suspense_account_raise = fields.Boolean(
-        string="Block if Suspense Account is Present", default=True)
-    lock_tax = fields.Boolean(string='Lock Tax Return')
-    lock_sale = fields.Boolean(string='Lock Sales')
-    lock_purchase = fields.Boolean(string='Lock Purchases')
-    lock_fiscalyear = fields.Boolean(string='Global Lock')
-    lock_hard = fields.Boolean(string='Hard Lock')
+        string="Block if Suspense Account is Present", default=True
+    )
+    lock_tax = fields.Boolean(string="Lock Tax Return")
+    lock_sale = fields.Boolean(string="Lock Sales")
+    lock_purchase = fields.Boolean(string="Lock Purchases")
+    lock_fiscalyear = fields.Boolean(string="Global Lock")
+    lock_hard = fields.Boolean(string="Hard Lock")
     encoding = fields.Selection(
         [
             ("iso8859_15", "ISO-8859-15"),
@@ -179,6 +191,22 @@ class AccountMoveExportConfig(models.Model):
                         % config.xlsx_analytic_bg_color
                     )
 
+    @api.constrains("group_lines", "column_ids")
+    def _check_group_lines(self):
+        for config in self:
+            if config.group_lines and config.column_ids.filtered(
+                lambda col: col.analytic_plan_id
+            ):
+                raise ValidationError(
+                    _(
+                        "On configuration '%s', the option to group lines is "
+                        "enabled, so you cannot select analytic plans on columns. "
+                        "We remind you that the option to group lines is "
+                        "incompatible with the export of analytic lines."
+                    )
+                    % config.display_name
+                )
+
 
 class AccountMoveExportConfigColumn(models.Model):
     _name = "account.move.export.config.column"
@@ -216,11 +244,20 @@ class AccountMoveExportConfigColumn(models.Model):
         precompute=True,
     )
     analytic_plan_id = fields.Many2one(
-        'account.analytic.plan', compute='_compute_analytic_plan_id',
-        store=True, readonly=False, precompute=True)
+        "account.analytic.plan",
+        compute="_compute_analytic_plan_id",
+        store=True,
+        readonly=False,
+        precompute=True,
+    )
     analytic_only = fields.Boolean(
-        compute='_compute_analytic_only', store=True, readonly=False, precompute=True,
-        help="If enabled, the analytic account will be written in this column but not the general account.")
+        compute="_compute_analytic_only",
+        store=True,
+        readonly=False,
+        precompute=True,
+        help="If enabled, the analytic account will be written in this column but"
+        "not the general account.",
+    )
 
     _sql_constraints = [
         (
@@ -247,7 +284,12 @@ class AccountMoveExportConfigColumn(models.Model):
                 "type": "char",
             },
             "date": {"label": _("Date"), "sequence": 30, "width": 10, "type": "date"},
-            "invoice_date": {"label": _("Invoice Date"), "sequence": 35, "width": 10, "type": "date"},
+            "invoice_date": {
+                "label": _("Invoice Date"),
+                "sequence": 35,
+                "width": 10,
+                "type": "date",
+            },
             "journal_code": {
                 "label": _("Journal Code"),
                 "sequence": 40,
@@ -260,6 +302,7 @@ class AccountMoveExportConfigColumn(models.Model):
                 "width": 25,
                 "type": "char",
             },
+            # grouping for partner and account fields is special, so no "grouping" key
             "account_code": {
                 "label": _("Account Code"),
                 "sequence": 50,
@@ -284,11 +327,19 @@ class AccountMoveExportConfigColumn(models.Model):
                 "width": 30,
                 "type": "char",
             },
+            "tax_names": {
+                "label": _("Taxes"),
+                "sequence": 90,
+                "width": 35,
+                "type": "char",
+                "grouping": "key",
+            },
             "item_label": {
                 "label": _("Journal Item Label"),
                 "sequence": 110,
                 "width": 50,
                 "type": "char",
+                "grouping": "concat",
             },
             "debit": {
                 "label": _("Debit"),
@@ -319,12 +370,14 @@ class AccountMoveExportConfigColumn(models.Model):
                 "sequence": 160,
                 "width": 20,
                 "type": "char",
+                "grouping": "key",
             },
             "due_date": {
                 "label": _("Due Date"),
                 "sequence": 170,
                 "width": 10,
                 "type": "date",
+                "grouping": "key",
             },
             "origin_currency_amount": {
                 "label": _("Origin Currency Amount"),
@@ -337,6 +390,7 @@ class AccountMoveExportConfigColumn(models.Model):
                 "sequence": 190,
                 "width": 9,
                 "type": "char",
+                "grouping": "key",
             },
         }
         line_obj = self.env["account.move.line"]
@@ -348,12 +402,14 @@ class AccountMoveExportConfigColumn(models.Model):
                         "sequence": 200,
                         "width": 10,
                         "type": "date",
+                        "grouping": "key",
                     },
                     "end_date": {
                         "label": _("End Date"),
                         "sequence": 210,
                         "width": 10,
                         "type": "date",
+                        "grouping": "key",
                     },
                 }
             )
@@ -366,17 +422,17 @@ class AccountMoveExportConfigColumn(models.Model):
         res = [(key, vals["label"]) for (key, vals) in tmp_list]
         return res
 
-    @api.depends('field')
+    @api.depends("field")
     def _compute_analytic_plan_id(self):
         for col in self:
-            if col.field and col.field not in ('account_code', 'account_name'):
+            if col.field and col.field not in ("account_code", "account_name"):
                 col.analytic_plan_id = False
 
-    @api.depends('field', 'analytic_plan_id')
+    @api.depends("field", "analytic_plan_id")
     def _compute_analytic_only(self):
         for col in self:
             if col.field:
-                if col.field in ('account_code', 'account_name'):
+                if col.field in ("account_code", "account_name"):
                     if not col.analytic_plan_id:
                         col.analytic_only = False
                 else:
@@ -388,8 +444,13 @@ class AccountMoveExportConfigColumn(models.Model):
             header_label = False
             if column.field:
                 header_label = column.field
-                if column.field in ('account_code', 'account_name') and column.analytic_plan_id:
-                    plan_header_name = unidecode(column.analytic_plan_id.name.lower().replace(' ', '_'))
+                if (
+                    column.field in ("account_code", "account_name")
+                    and column.analytic_plan_id
+                ):
+                    plan_header_name = unidecode(
+                        column.analytic_plan_id.name.lower().replace(" ", "_")
+                    )
                     header_label = f"{header_label}_{plan_header_name}"
             column.header_label = header_label
 

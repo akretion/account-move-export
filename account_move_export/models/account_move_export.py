@@ -8,13 +8,12 @@ import logging
 from io import BytesIO, StringIO
 
 from dateutil.relativedelta import relativedelta
-from unidecode import unidecode
 from markupsafe import Markup
+from unidecode import unidecode
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.misc import format_date
-
 
 logger = logging.getLogger(__name__)
 
@@ -189,7 +188,7 @@ class AccountMoveExport(models.Model):
         rg_move_res = self.env["account.move"]._read_group(
             [("account_move_export_id", "in", self.ids)],
             groupby=["account_move_export_id"],
-            aggregates=['__count'],
+            aggregates=["__count"],
         )
         move_data = {export.id: move_count for (export, move_count) in rg_move_res}
         for export in self:
@@ -276,32 +275,6 @@ class AccountMoveExport(models.Model):
             domain.append(("state", "in", ("draft", "posted")))
         return domain
 
-    def _prepare_columns(self, export_options):
-        number = 0
-        for column in self.config_id.column_ids:
-            col_vals = {
-                    "field": column.field,
-                    "field_type": column.field_type,
-                    "excel_width": column.excel_width,
-                    "header_label": column.header_label,
-                    "number": number,
-                }
-            if column.field in ('account_code', 'account_name') and column.analytic_plan_id:
-                plan = column.analytic_plan_id
-                if plan not in export_options['analytic_plan2field']:
-                    field = plan._find_plan_column(model="account.analytic.line")
-                    if not field:
-                        raise UserError(_(
-                            "Odoo could not find the field of the analytic line "
-                            "corresponding to analytic plan '%(plan)s'. "
-                            "This should never happen.", plan=plan.display_name))
-                    export_options['analytic_plan2field'][plan] = field.name
-
-                col_vals['analytic_plan_id'] = column.analytic_plan_id.id
-                col_vals['analytic_only'] = column.analytic_only
-            export_options['cols'].append(col_vals)
-            number += 1
-
     def _csv_format_amount(self, amount, export_options):
         if not amount:
             amount = 0.0
@@ -315,7 +288,11 @@ class AccountMoveExport(models.Model):
         row = {}
         for col in export_options["cols"]:
             field = col["field"]
-            if ldict["type"] == "A" and field in ('account_code', 'account_name') and col.get('analytic_plan_id'):
+            if (
+                ldict["type"] == "A"
+                and field in ("account_code", "account_name")
+                and col.get("analytic_plan_id")
+            ):
                 field = f"{field},{col['analytic_plan_id']}"
             header = col["header_label"]
             if field in ldict:
@@ -329,26 +306,71 @@ class AccountMoveExport(models.Model):
                     row[header] = ldict[field]
         return row
 
+    def _prepare_columns(self, export_options):
+        number = 0
+        field_dict = self.env["account.move.export.config.column"]._prepare_field_dict()
+        for column in self.config_id.column_ids:
+            col_vals = {
+                "field": column.field,
+                "field_type": column.field_type,
+                "excel_width": column.excel_width,
+                "header_label": column.header_label,
+                "number": number,
+            }
+            if (
+                not export_options["group_lines"]
+                and column.field in ("account_code", "account_name")
+                and column.analytic_plan_id
+            ):
+                plan = column.analytic_plan_id
+                if plan not in export_options["analytic_plan2field"]:
+                    field = plan._find_plan_column(model="account.analytic.line")
+                    if not field:
+                        raise UserError(
+                            _(
+                                "Odoo could not find the field of the analytic line "
+                                "corresponding to analytic plan '%(plan)s'. "
+                                "This should never happen.",
+                                plan=plan.display_name,
+                            )
+                        )
+                    export_options["analytic_plan2field"][plan] = field.name
+
+                col_vals["analytic_plan_id"] = column.analytic_plan_id.id
+                col_vals["analytic_only"] = column.analytic_only
+            export_options["cols"].append(col_vals)
+            if col_vals["field_type"] in ("float", "company_currency"):
+                grouping = "sum"
+            else:
+                grouping = field_dict[column.field].get("grouping")
+            export_options["col2grouping"][column.field] = grouping
+
+            number += 1
+
     def _prepare_export_options(self):
         self.ensure_one()
-        if not self.config_id:
+        config = self.config_id
+        if not config:
             raise UserError(
                 _("Missing configuration on journal entries export '%s'.")
                 % self.display_name
             )
         export_options = {
-            "header_line": self.config_id.header_line,
-            "partner_code_field": self.config_id.partner_code_field,
-            "partner_option": self.config_id.partner_option,
+            "header_line": config.header_line,
+            "partner_code_field": config.partner_code_field,
+            "partner_option": config.partner_option,
+            "group_lines": config.group_lines,
+            "join_char": config.join_char,
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
             "cols": [],
+            "col2grouping": {},
             "analytic_plan2field": {},
         }
         self._prepare_columns(export_options)
-        if self.config_id.partner_option == "accounts":
-            if not self.config_id.partner_account_ids.filtered(
+        if config.partner_option == "accounts":
+            if not config.partner_account_ids.filtered(
                 lambda x: self.company_id.id in x.company_ids.ids
             ):
                 raise UserError(
@@ -358,12 +380,10 @@ class AccountMoveExport(models.Model):
                         "will be exported."
                     )
                 )
-            export_options[
-                "partner_account_ids"
-            ] = self.config_id.partner_account_ids.filtered(
+            export_options["partner_account_ids"] = config.partner_account_ids.filtered(
                 lambda x: self.company_id.id in x.company_ids.ids
             ).ids
-        elif self.config_id.partner_option == "receivable_payable":  # just for perf
+        elif config.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
                 .search(
@@ -378,20 +398,23 @@ class AccountMoveExport(models.Model):
                 )
                 .ids
             )
-        if self.config_id.suspense_account_raise:
+        if config.suspense_account_raise:
             suspense_account_ids = set()
-            journals = self.env['account.journal'].search_read([
-                ('company_id', '=', self.company_id.id),
-                ('type', 'in', ('bank', 'cash', 'credit')),
-                ('suspense_account_id', '!=', False),
-                ], ['suspense_account_id'])
+            journals = self.env["account.journal"].search_read(
+                [
+                    ("company_id", "=", self.company_id.id),
+                    ("type", "in", ("bank", "cash", "credit")),
+                    ("suspense_account_id", "!=", False),
+                ],
+                ["suspense_account_id"],
+            )
             for journal in journals:
-                suspense_account_ids.add(journal['suspense_account_id'][0])
-            export_options['suspense_account_ids'] = list(suspense_account_ids)
-        if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
+                suspense_account_ids.add(journal["suspense_account_id"][0])
+            export_options["suspense_account_ids"] = list(suspense_account_ids)
+        if config.file_format and config.file_format.startswith("csv"):
             if (
-                self.config_id.quoting == "none"
-                and self.config_id.decimal_separator == self.config_id.delimiter
+                config.quoting == "none"
+                and config.decimal_separator == config.delimiter
             ):
                 raise UserError(
                     _(
@@ -406,13 +429,11 @@ class AccountMoveExport(models.Model):
             }
             export_options.update(
                 {
-                    "date_format": self.config_id.date_format,
-                    "decimal_separator": self.config_id.decimal_separator,
-                    "encoding": self.config_id.encoding,
-                    "delimiter": self.config_id.delimiter == "tab"
-                    and "\t"
-                    or self.config_id.delimiter,
-                    "quoting": quote_map.get(self.config_id.quoting),
+                    "date_format": config.date_format,
+                    "decimal_separator": config.decimal_separator,
+                    "encoding": config.encoding,
+                    "delimiter": config.delimiter == "tab" and "\t" or config.delimiter,
+                    "quoting": quote_map.get(config.quoting),
                 }
             )
         return export_options
@@ -452,6 +473,55 @@ class AccountMoveExport(models.Model):
         }
         return styles
 
+    def _prepare_moves(self, export_options):
+        self.ensure_one()
+        res = []  # one entry per move. One entry = list of mline_dict
+        for move in self.move_ids:
+            mline_dict_list = []
+            for mline in move.line_ids.filtered(
+                lambda x: x.display_type not in ("line_section", "line_note")
+            ):
+                mline_dict = mline._prepare_account_move_export_line(export_options)
+                mline_dict_list.append(mline_dict)
+            if export_options["group_lines"]:
+                key2mline_dict = {}
+                for mline_dict in mline_dict_list:
+                    key = mline_dict["group_key"]
+                    if key in key2mline_dict:
+                        for col_name, grouping in export_options[
+                            "col2grouping"
+                        ].items():
+                            if grouping == "sum":
+                                key2mline_dict[key][col_name] += mline_dict[col_name]
+                            elif grouping == "concat" and mline_dict[col_name]:
+                                if key2mline_dict[key][col_name]:
+                                    key2mline_dict[key][col_name] = export_options[
+                                        "join_char"
+                                    ].join(
+                                        [
+                                            key2mline_dict[key][col_name],
+                                            mline_dict[col_name],
+                                        ]
+                                    )
+                                else:
+                                    key2mline_dict[key][col_name] = mline_dict[col_name]
+                    else:
+                        key2mline_dict[key] = {}
+                        for col_name in export_options["col2grouping"].keys():
+                            key2mline_dict[key][col_name] = mline_dict[col_name]
+                mline_dict_list_unsorted = list(key2mline_dict.values())
+            else:
+                mline_dict_list_unsorted = mline_dict_list
+            if "account_code" in export_options["col2grouping"]:
+                mline_dict_list_sorted = sorted(
+                    mline_dict_list_unsorted,
+                    key=lambda to_sort: to_sort["account_code"],
+                )
+                res.append(mline_dict_list_sorted)
+            else:
+                res.append(mline_dict_list_unsorted)
+        return res
+
     def _generate_xlsx_generic(self):
         out_file = BytesIO()
         workbook = xlsxwriter.Workbook(out_file)
@@ -467,13 +537,10 @@ class AccountMoveExport(models.Model):
             for col in cols:
                 sheet.write(line, col["number"], col["header_label"], styles["header"])
             line += 1
-        for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
-                mline_dict = mline._prepare_account_move_export_line(export_options)
+        for move in self._prepare_moves(export_options):
+            for mline_dict in move:
                 for col in cols:
-                    if col["field"] in mline_dict and not col.get('analytic_only'):
+                    if col["field"] in mline_dict and not col.get("analytic_only"):
                         sheet.write(
                             line,
                             col["number"],
@@ -482,21 +549,16 @@ class AccountMoveExport(models.Model):
                         )
                 line += 1
                 if export_options["analytic_plan2field"]:
-                    for aline in mline.analytic_line_ids:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
-                        )
-                        if not aline_dict:
-                            continue
+                    for aline_dict in mline_dict["analytic_lines"]:
                         for col in cols:
-                            if col.get('analytic_plan_id'):
+                            if col.get("analytic_plan_id"):
                                 field_key = f"{col['field']},{col['analytic_plan_id']}"
                             else:
                                 field_key = col["field"]
                             sheet.write(
                                 line,
                                 col["number"],
-                                aline_dict.get(field_key, '') or '',
+                                aline_dict.get(field_key, "") or "",
                                 styles[f"ana_{col['field_type']}"],
                             )
                         line += 1
@@ -517,21 +579,14 @@ class AccountMoveExport(models.Model):
         )
         if export_options["header_line"]:
             w.writeheader()
-        for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
-                mline_dict = mline._prepare_account_move_export_line(export_options)
+        for move in self._prepare_moves(export_options):
+            for mline_dict in move:
                 row = self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(row)
                 if export_options["analytic_plan2field"]:
-                    for aline in mline.analytic_line_ids:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
-                        )
-                        if aline_dict:
-                            row = self._csv_postprocess_line(aline_dict, export_options)
-                            w.writerow(row)
+                    for aline_dict in mline_dict["analytic_lines"]:
+                        row = self._csv_postprocess_line(aline_dict, export_options)
+                        w.writerow(row)
         return self._csv_encode(tmpfile, export_options)
 
     def _csv_encode(self, tmpfile, export_options):
@@ -564,10 +619,10 @@ class AccountMoveExport(models.Model):
 
     def _prepare_filename(self):
         if self.config_id.file_format == "csv_generic":
-            ext = self.config_id.file_extension
+            ext = self.config_id.file_extension[1:]
         else:
-            ext = ".%s" % self.config_id.file_format.split("_")[0]
-        return "".join([self.name.replace("_", "") or "export", ext])
+            ext = self.config_id.file_format.split("_")[0]
+        return ".".join([self.name.replace("_", "") or "export", ext])
 
     def draft2done(self):
         self.ensure_one()
@@ -618,9 +673,9 @@ class AccountMoveExport(models.Model):
                 )
         else:
             self.message_post(
-                body=Markup(_(
-                    "Lock date <b>not updated</b> because the end date is not set."
-                ))
+                body=Markup(
+                    _("Lock date <b>not updated</b> because the end date is not set.")
+                )
             )
 
     def _update_lock_vals(self, field, vals):

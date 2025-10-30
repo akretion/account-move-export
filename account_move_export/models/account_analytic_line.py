@@ -12,14 +12,16 @@ class AccountAnalyticLine(models.Model):
         self.ensure_one()
         res = {"type": "A"}
         skip_line = True
-        for plan, ana_field in export_options['analytic_plan2field'].items():
+        for plan, ana_field in export_options["analytic_plan2field"].items():
             if self[ana_field]:
                 skip_line = False
-                res[f'account_code,{plan.id}'] = self[ana_field].code or self[ana_field].name
-                res[f'account_name,{plan.id}'] = self[ana_field].name
+                res[f"account_code,{plan.id}"] = (
+                    self[ana_field].code or self[ana_field].name
+                )
+                res[f"account_name,{plan.id}"] = self[ana_field].name
             else:
-                res[f'account_code,{plan.id}'] = None
-                res[f'account_name,{plan.id}'] = None
+                res[f"account_code,{plan.id}"] = None
+                res[f"account_name,{plan.id}"] = None
         if skip_line:
             return None
 
@@ -45,14 +47,16 @@ class AccountAnalyticLine(models.Model):
             partner_name = self.partner_id._prepare_account_move_export_partner_name(
                 export_options
             )
-        res.update({
-            "entry_number": move.name,
-            "date": self.date,
-            "partner_code": partner_code,
-            "partner_name": partner_name,
-            "item_label": self.name or None,
-            "debit": debit,
-            "credit": credit,
-            "balance": export_options["company_currency"].round(self.amount * -1),
-        })
+        res.update(
+            {
+                "entry_number": move.name,
+                "date": self.date,
+                "partner_code": partner_code,
+                "partner_name": partner_name,
+                "item_label": self.name or None,
+                "debit": debit,
+                "credit": credit,
+                "balance": export_options["company_currency"].round(self.amount * -1),
+            }
+        )
         return res

@@ -34,7 +34,8 @@
                     <field
                         name="header_line"
                         invisible="file_format not in ('csv_generic', 'xlsx_generic')"
-                    />
+                            />
+                    <field name="group_lines"/>
                     <field name="partner_code_field" />
                     <field name="partner_option" widget="radio" />
                     <field
@@ -43,6 +44,7 @@
                         required="partner_option == 'accounts'"
                         invisible="partner_option != 'accounts'"
                         />
+                    <field name="join_char"/>
                     <field name="suspense_account_raise"/>
                     <field name="lock_hard" />
                     <field name="lock_fiscalyear" invisible="lock_hard"/>
@@ -109,6 +111,7 @@
             <field name="sequence" widget="handle" />
             <field name="name" decoration-bf="1" />
             <field name="file_format" optional="show" />
+            <field name="group_lines" optional="show"/>
             <field name="partner_option" optional="show" />
             <field name="partner_code_field" optional="show" />
             <field

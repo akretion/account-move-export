@@ -506,7 +506,7 @@ class AccountMoveExport(models.Model):
                                 else:
                                     key2mline_dict[key][col_name] = mline_dict[col_name]
                     else:
-                        key2mline_dict[key] = {}
+                        key2mline_dict[key] = {"type": mline_dict["type"]}
                         for col_name in export_options["col2grouping"].keys():
                             key2mline_dict[key][col_name] = mline_dict[col_name]
                 mline_dict_list_unsorted = list(key2mline_dict.values())

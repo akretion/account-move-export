@@ -59,7 +59,7 @@ class AccountMoveExportConfig(models.Model):
     )
     group_lines = fields.Boolean(
         string="Group Journal Items",
-        help="This option is incompatible with the export of analytic lines."
+        help="This option is incompatible with the export of analytic lines.",
     )
     join_char = fields.Char(
         default="-",

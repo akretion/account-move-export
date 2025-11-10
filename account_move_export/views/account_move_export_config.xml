@@ -86,7 +86,7 @@
             </group>
             <group name="columns" string="Columns">
                 <field name="column_ids" nolabel="1" colspan="2">
-                    <list editable="bottom">
+                    <tree editable="bottom">
                         <field name="sequence" widget="handle" />
                         <field name="field" />
                         <field name="analytic_plan_id" groups="analytic.group_analytic_accounting" invisible="field not in ('account_name', 'account_code')"/>
@@ -97,7 +97,7 @@
                                 name="excel_width"
                                 column_invisible="parent.file_format != 'xlsx_generic'"
                             />
-                    </list>
+                    </tree>
                 </field>
             </group>
         </form>
@@ -107,7 +107,7 @@
 <record id="account_move_export_config_tree" model="ir.ui.view">
     <field name="model">account.move.export.config</field>
     <field name="arch" type="xml">
-        <list>
+        <tree>
             <field name="sequence" widget="handle" />
             <field name="name" decoration-bf="1" />
             <field name="file_format" optional="show" />
@@ -119,7 +119,7 @@
                 groups="base.group_multi_company"
                 optional="show"
             />
-        </list>
+        </tree>
     </field>
 </record>
 

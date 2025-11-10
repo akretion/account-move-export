@@ -371,7 +371,7 @@ class AccountMoveExport(models.Model):
         self._prepare_columns(export_options)
         if config.partner_option == "accounts":
             if not config.partner_account_ids.filtered(
-                lambda x: self.company_id.id in x.company_ids.ids
+                lambda x: x.company_id.id == self.company_id.id
             ):
                 raise UserError(
                     _(
@@ -381,14 +381,14 @@ class AccountMoveExport(models.Model):
                     )
                 )
             export_options["partner_account_ids"] = config.partner_account_ids.filtered(
-                lambda x: self.company_id.id in x.company_ids.ids
+                lambda x: x.company_id.id == self.company_id.id
             ).ids
         elif config.partner_option == "receivable_payable":  # just for perf
             export_options["partner_account_ids"] = (
                 self.env["account.account"]
                 .search(
                     [
-                        ("company_ids", "in", self.company_id.id),
+                        ("company_id", "=", self.company_id.id),
                         (
                             "account_type",
                             "in",

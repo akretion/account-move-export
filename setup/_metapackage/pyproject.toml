@@ -1,11 +1,12 @@
 [project]
 name = "odoo-addons-akretion-account-move-export"
-version = "18.0.20250207.0"
+version = "17.0.20251110.0"
 dependencies = [
-    "odoo-addon-account_move_export==18.0.*",
+    "odoo-addon-account_move_export>=17.0dev,<17.1dev",
+    "odoo-addon-account_move_export_quadra>=17.0dev,<17.1dev",
 ]
 classifiers=[
     "Programming Language :: Python",
     "Framework :: Odoo",
-    "Framework :: Odoo :: 18.0",
+    "Framework :: Odoo :: 17.0",
 ]

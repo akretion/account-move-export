@@ -5,6 +5,8 @@
 import base64
 import csv
 import logging
+import os
+import zipfile
 from io import BytesIO, StringIO
 
 from dateutil.relativedelta import relativedelta
@@ -361,14 +363,17 @@ class AccountMoveExport(models.Model):
             )
         if self.config_id.suspense_account_raise:
             suspense_account_ids = set()
-            journals = self.env['account.journal'].search_read([
-                ('company_id', '=', self.company_id.id),
-                ('type', 'in', ('bank', 'cash')),
-                ('suspense_account_id', '!=', False),
-                ], ['suspense_account_id'])
+            journals = self.env["account.journal"].search_read(
+                [
+                    ("company_id", "=", self.company_id.id),
+                    ("type", "in", ("bank", "cash")),
+                    ("suspense_account_id", "!=", False),
+                ],
+                ["suspense_account_id"],
+            )
             for journal in journals:
-                suspense_account_ids.add(journal['suspense_account_id'][0])
-            export_options['suspense_account_ids'] = list(suspense_account_ids)
+                suspense_account_ids.add(journal["suspense_account_id"][0])
+            export_options["suspense_account_ids"] = list(suspense_account_ids)
         if self.config_id.file_format and self.config_id.file_format.startswith("csv"):
             if (
                 self.config_id.quoting == "none"
@@ -504,6 +509,38 @@ class AccountMoveExport(models.Model):
             )
         moves.write({"account_move_export_id": self.id})
 
+    def _generate_zip_with_attachments(self, table_file_bytes, table_filename):
+        filename_no_ext, extension = os.path.splitext(table_filename)
+        zip_filename = f"{filename_no_ext}.zip"
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.writestr(table_filename, table_file_bytes)
+            for move in self.move_ids:
+                self._generate_zip_add_move_attachments(move, zip_file)
+        return zip_buffer.getvalue(), zip_filename
+
+    def _prepare_zip_attachment_domain(self, move):
+        """Inherit to add a filter on 'mimetype' field"""
+        attach_domain = [
+            ("res_model", "=", "account.move"),
+            ("res_id", "=", move.id),
+            ("type", "=", "binary"),
+        ]
+        return attach_domain
+
+    def _prepare_zip_attachment_filename(self, move, attach):
+        dir_name = move.name.replace("/", "_")
+        return os.path.join(dir_name, attach.name)
+
+    def _generate_zip_add_move_attachments(self, move, zip_file):
+        attachs = self.env["ir.attachment"].search(
+            self._prepare_zip_attachment_domain(move)
+        )
+        for attach in attachs:
+            zip_file.writestr(
+                self._prepare_zip_attachment_filename(move, attach), attach.raw
+            )
+
     def _prepare_filename(self):
         if self.config_id.file_format == "csv_generic":
             ext = self.config_id.file_extension
@@ -522,10 +559,15 @@ class AccountMoveExport(models.Model):
         method_name = f"_generate_{self.config_id.file_format}"
         data_bytes_pointer = getattr(self, method_name)
         data_bytes = data_bytes_pointer()
+        filename = self._prepare_filename()
+        if self.config_id.zip_with_attachments:
+            data_bytes, filename = self._generate_zip_with_attachments(
+                data_bytes, filename
+            )
 
         attach = self.env["ir.attachment"].create(
             {
-                "name": self._prepare_filename(),
+                "name": filename,
                 "datas": base64.encodebytes(data_bytes),
             }
         )

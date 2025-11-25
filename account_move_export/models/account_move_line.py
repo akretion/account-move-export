@@ -2,7 +2,7 @@
 # @author: Alexis de Lattre <alexis.delattre@akretion.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import models, _
+from odoo import _, models
 from odoo.exceptions import UserError
 
 
@@ -14,16 +14,19 @@ class AccountMoveLine(models.Model):
         assert not self.display_type
         move = self.move_id
         if (
-                export_options.get('suspense_account_ids') and
-                self.account_id.id in export_options['suspense_account_ids']):
-            raise UserError(_(
-                "On the export configuration, the option "
-                "'Block if Suspense Account is Present' is enabled. "
-                "The journal entry %(move)s has the suspense account "
-                "'%(account)s'.",
-                move=move.display_name,
-                account=self.account_id.display_name,
-                ))
+            export_options.get("suspense_account_ids")
+            and self.account_id.id in export_options["suspense_account_ids"]
+        ):
+            raise UserError(
+                _(
+                    "On the export configuration, the option "
+                    "'Block if Suspense Account is Present' is enabled. "
+                    "The journal entry %(move)s has the suspense account "
+                    "'%(account)s'.",
+                    move=move.display_name,
+                    account=self.account_id.display_name,
+                )
+            )
         partner_code = partner_name = None
         if self.partner_id and (
             (

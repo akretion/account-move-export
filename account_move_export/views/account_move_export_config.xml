@@ -29,7 +29,8 @@
                 </div>
         <group name="main">
             <group name="main-left">
-                        <field name="file_format" />
+                    <field name="file_format" />
+                    <field name="zip_with_attachments" />
                         <field name="active" invisible="1" />
 
                         <field
@@ -42,8 +43,8 @@
                             name="partner_account_ids"
                             widget="many2many_tags"
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
-                                />
-                        <field name="suspense_account_raise"/>
+                        />
+                        <field name="suspense_account_raise" />
                         <field name="lock" widget="radio" />
                         <field name="company_id" groups="base.group_multi_company" />
                         <field name="company_id" invisible="1" />
@@ -101,6 +102,7 @@
                     <field name="sequence" widget="handle" />
                     <field name="name" decoration-bf="1" />
                     <field name="file_format" optional="show" />
+                    <field name="zip_with_attachments" string="ZIP" optional="show" />
                     <field name="partner_option" optional="show" />
                     <field name="partner_code_field" optional="show" />
                     <field

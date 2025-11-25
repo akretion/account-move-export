@@ -794,8 +794,9 @@ class AccountMoveExport(models.Model):
 
 class AccountMoveExportMulti(models.Model):
     _name = "account.move.export.multi"
+    _description = "Account move export multi"
 
-    name = fields.Char(string="name", require=True, compute="_compute_name_multi")
+    name = fields.Char(string="name", required=True, compute="_compute_name_multi")
     move_export_ids = fields.One2many(
         comodel_name="account.move.export", inverse_name="move_export_multi_id"
     )

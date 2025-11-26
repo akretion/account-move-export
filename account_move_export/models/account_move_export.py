@@ -571,7 +571,7 @@ class AccountMoveExport(models.Model):
             ext = self.config_id.file_extension
         else:
             ext = ".%s" % self.config_id.file_format.split("_")[0]
-        return "".join([self.name.replace("_", "") or "export", ext])
+        return "".join([self.name.replace("/", "_").replace(" ", "_") or "export", ext])
 
     def draft2done(self):
         self.ensure_one()

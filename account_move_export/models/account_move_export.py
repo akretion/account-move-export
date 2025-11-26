@@ -529,17 +529,41 @@ class AccountMoveExport(models.Model):
         ]
         return attach_domain
 
-    def _prepare_zip_attachment_filename(self, move, attach):
+    def _prepare_zip_attachment_filename(self, move, filename):
         dir_name = move.name.replace("/", "_")
-        return os.path.join(dir_name, attach.name)
+        return os.path.join(dir_name, filename)
 
     def _generate_zip_add_move_attachments(self, move, zip_file):
         attachs = self.env["ir.attachment"].search(
             self._prepare_zip_attachment_domain(move)
         )
+        checksum2filename = {}
         for attach in attachs:
+            # When several attachments are identical with different filenames -> skip
+            # duplicates
+            if attach.checksum in checksum2filename:
+                logger.warning(
+                    "Attachment %s ID %d on move %s ID %d is a duplicate, "
+                    "so it won't be in the ZIP",
+                    attach.name,
+                    attach.id,
+                    move.display_name,
+                    move.id,
+                )
+                continue
+            # When several attachments have the same filename -> we give
+            # different filenames
+            filename = attach.name
+            existing_filenames = list(checksum2filename.values())
+            if filename in existing_filenames:
+                filename_ini_no_ext, extension = os.path.splitext(filename)
+                count = 2
+                while filename in existing_filenames:
+                    filename = f"{filename_ini_no_ext}-{count}{extension}"
+                    count += 1
+            checksum2filename[attach.checksum] = filename
             zip_file.writestr(
-                self._prepare_zip_attachment_filename(move, attach), attach.raw
+                self._prepare_zip_attachment_filename(move, filename), attach.raw
             )
 
     def _prepare_filename(self):

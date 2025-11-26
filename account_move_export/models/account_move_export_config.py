@@ -34,7 +34,8 @@ class AccountMoveExportConfig(models.Model):
         string="ZIP with Attachments",
         help="If enabled, Odoo will generate a ZIP file that contains the "
         "spreadsheet file and a subdirectory for each exported journal entry "
-        "that contains the attachments of that journal entry.")
+        "that contains the attachments of that journal entry.",
+    )
     header_line = fields.Boolean(default=True)
     date_format = fields.Char(default="%d/%m/%Y")
     partner_code_field = fields.Selection(

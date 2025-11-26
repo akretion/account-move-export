@@ -38,7 +38,7 @@ class AccountMoveExport(models.Model):
             res["date_end"] = date_end
         return res
 
-    name = fields.Char(required=True, default=lambda self: _("New"))
+    name = fields.Char(required=True, default=lambda self: _("New"), copy=False)
     filter_type = fields.Selection(
         [
             ("selected", "Selected"),
@@ -133,7 +133,7 @@ class AccountMoveExport(models.Model):
         default=lambda self: self._default_config_id(),
         domain="[('company_id', 'in', (False, company_id))]",
     )
-    attachment_id = fields.Many2one("ir.attachment", readonly=True)
+    attachment_id = fields.Many2one("ir.attachment", readonly=True, copy=False)
     attachment_datas = fields.Binary(
         related="attachment_id.datas", string="Export File"
     )
@@ -147,6 +147,7 @@ class AccountMoveExport(models.Model):
         required=True,
         readonly=True,
         tracking=True,
+        copy=False,
     )
     sent = fields.Boolean()
     show_send_button = fields.Boolean(compute="_compute_show_send_button")

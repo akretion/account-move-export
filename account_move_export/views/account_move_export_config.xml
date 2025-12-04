@@ -30,6 +30,7 @@
             <group name="main">
                 <group name="main-left">
                     <field name="file_format" />
+                    <field name="zip_with_attachments" />
                     <field name="active" invisible="1" />
                     <field
                         name="header_line"
@@ -111,6 +112,7 @@
             <field name="sequence" widget="handle" />
             <field name="name" decoration-bf="1" />
             <field name="file_format" optional="show" />
+            <field name="zip_with_attachments" string="ZIP" optional="show" />
             <field name="group_lines" optional="show"/>
             <field name="partner_option" optional="show" />
             <field name="partner_code_field" optional="show" />

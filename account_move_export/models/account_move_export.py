@@ -2,9 +2,10 @@
 # @author: Alexis de Lattre <alexis.delattre@akretion.com>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-import base64
 import csv
 import logging
+import os
+import zipfile
 from io import BytesIO, StringIO
 
 from dateutil.relativedelta import relativedelta
@@ -574,12 +575,69 @@ class AccountMoveExport(models.Model):
             )
         moves.write({"account_move_export_id": self.id})
 
+    def _generate_zip_with_attachments(self, table_file_bytes, table_filename):
+        filename_no_ext, extension = os.path.splitext(table_filename)
+        zip_filename = f"{filename_no_ext}.zip"
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.writestr(table_filename, table_file_bytes)
+            for move in self.move_ids:
+                self._generate_zip_add_move_attachments(move, zip_file)
+        return zip_buffer.getvalue(), zip_filename
+
+    def _prepare_zip_attachment_domain(self, move):
+        """Inherit to add a filter on 'mimetype' field"""
+        attach_domain = [
+            ("res_model", "=", "account.move"),
+            ("res_id", "=", move.id),
+            ("type", "=", "binary"),
+        ]
+        return attach_domain
+
+    def _prepare_zip_attachment_filename(self, move, filename):
+        dir_name = move.name.replace("/", "_")
+        return os.path.join(dir_name, filename)
+
+    def _generate_zip_add_move_attachments(self, move, zip_file):
+        attachs = self.env["ir.attachment"].search(
+            self._prepare_zip_attachment_domain(move)
+        )
+        checksum2filename = {}
+        for attach in attachs:
+            # When several attachments are identical with different filenames -> skip
+            # duplicates
+            if attach.checksum in checksum2filename:
+                logger.warning(
+                    "Attachment %s ID %d on move %s ID %d is a duplicate, "
+                    "so it won't be in the ZIP",
+                    attach.name,
+                    attach.id,
+                    move.display_name,
+                    move.id,
+                )
+                continue
+            # When several attachments have the same filename -> we give
+            # different filenames
+            filename = attach.name
+            existing_filenames = list(checksum2filename.values())
+            if filename in existing_filenames:
+                filename_ini_no_ext, extension = os.path.splitext(filename)
+                count = 2
+                while filename in existing_filenames:
+                    filename = f"{filename_ini_no_ext}-{count}{extension}"
+                    count += 1
+            checksum2filename[attach.checksum] = filename
+            zip_file.writestr(
+                self._prepare_zip_attachment_filename(move, filename), attach.raw
+            )
+
     def _prepare_filename(self):
         if self.config_id.file_format == "csv_generic":
-            ext = self.config_id.file_extension
+            ext = self.config_id.file_extension[1:]
         else:
-            ext = ".%s" % self.config_id.file_format.split("_")[0]
-        return "".join([self.name.replace("_", "") or "export", ext])
+            ext = self.config_id.file_format.split("_")[0]
+        name = self.name and self.name.replace("/", "_").replace(" ", "_")
+        return ".".join([name or "export", ext])
 
     def draft2done(self):
         self.ensure_one()
@@ -592,11 +650,16 @@ class AccountMoveExport(models.Model):
         method_name = f"_generate_{self.config_id.file_format}"
         data_bytes_pointer = getattr(self, method_name)
         data_bytes = data_bytes_pointer()
+        filename = self._prepare_filename()
+        if self.config_id.zip_with_attachments:
+            data_bytes, filename = self._generate_zip_with_attachments(
+                data_bytes, filename
+            )
 
         attach = self.env["ir.attachment"].create(
             {
-                "name": self._prepare_filename(),
-                "datas": base64.encodebytes(data_bytes),
+                "name": filename,
+                "raw": data_bytes,
             }
         )
 

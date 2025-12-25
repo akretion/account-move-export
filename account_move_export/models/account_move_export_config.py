@@ -61,6 +61,17 @@ class AccountMoveExportConfig(models.Model):
         "account.account",
         string="Accounts with Partner",
     )
+    group_lines = fields.Boolean(
+        string="Group Journal Items",
+        help="This option is incompatible with the export of analytic lines.",
+    )
+    join_char = fields.Char(
+        default="-",
+        string="Join Character(s)",
+        required=True,
+        help="Character(s) used when joining pieces of text. "
+        "Used for field 'Taxes' and for journal entry labels when grouping is enabled.",
+    )
     default_journal_ids = fields.Many2many(
         "account.journal",
         string="Default Journals",
@@ -202,6 +213,20 @@ class AccountMoveExportConfig(models.Model):
                         % config.xlsx_analytic_bg_color
                     )
 
+    @api.constrains("group_lines", "analytic_option")
+    def _check_group_lines(self):
+        for config in self:
+            if config.group_lines and config.analytic_option != "no":
+                raise ValidationError(
+                    _(
+                        "On configuration '%s', the option to group lines is "
+                        "enabled, so you cannot enable the analytic export. "
+                        "We remind you that the option to group lines is "
+                        "incompatible with the export of analytic lines."
+                    )
+                    % config.display_name
+                )
+
 
 class AccountMoveExportConfigColumn(models.Model):
     _name = "account.move.export.config.column"
@@ -277,6 +302,7 @@ class AccountMoveExportConfigColumn(models.Model):
                 "width": 25,
                 "type": "char",
             },
+            # grouping for partner and account fields is special, so no "grouping" key
             "account_code": {
                 "label": _("Account Code"),
                 "sequence": 50,
@@ -301,11 +327,19 @@ class AccountMoveExportConfigColumn(models.Model):
                 "width": 30,
                 "type": "char",
             },
+            "tax_names": {
+                "label": _("Taxes"),
+                "sequence": 90,
+                "width": 35,
+                "type": "char",
+                "grouping": "key",
+            },
             "item_label": {
                 "label": _("Journal Item Label"),
                 "sequence": 110,
                 "width": 50,
                 "type": "char",
+                "grouping": "concat",
             },
             "debit": {
                 "label": _("Debit"),
@@ -336,12 +370,14 @@ class AccountMoveExportConfigColumn(models.Model):
                 "sequence": 160,
                 "width": 20,
                 "type": "char",
+                "grouping": "key",
             },
             "due_date": {
                 "label": _("Due Date"),
                 "sequence": 170,
                 "width": 10,
                 "type": "date",
+                "grouping": "key",
             },
             "origin_currency_amount": {
                 "label": _("Origin Currency Amount"),
@@ -354,6 +390,7 @@ class AccountMoveExportConfigColumn(models.Model):
                 "sequence": 190,
                 "width": 9,
                 "type": "char",
+                "grouping": "key",
             },
         }
         line_obj = self.env["account.move.line"]
@@ -365,12 +402,14 @@ class AccountMoveExportConfigColumn(models.Model):
                         "sequence": 200,
                         "width": 10,
                         "type": "date",
+                        "grouping": "key",
                     },
                     "end_date": {
                         "label": _("End Date"),
                         "sequence": 210,
                         "width": 10,
                         "type": "date",
+                        "grouping": "key",
                     },
                 }
             )

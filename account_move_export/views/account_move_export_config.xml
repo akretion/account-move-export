@@ -37,6 +37,7 @@
                             name="header_line"
                             attrs="{'invisible': [('file_format', 'not in', ('csv_generic', 'xlsx_generic'))]}"
                         />
+                        <field name="group_lines"/>
                         <field
                             name="analytic_option"
                             groups="analytic.group_analytic_accounting"
@@ -56,6 +57,7 @@
                             widget="many2many_tags"
                             attrs="{'required': [('partner_option', '=', 'accounts')], 'invisible': [('partner_option', '!=', 'accounts')]}"
                                 />
+                        <field name="join_char"/>
                         <field name="suspense_account_raise"/>
                         <field name="lock" widget="radio" />
                         <field name="company_id" groups="base.group_multi_company" />
@@ -117,6 +119,7 @@
                     <field name="name" decoration-bf="1" />
                     <field name="file_format" optional="show" />
                     <field name="zip_with_attachments" optional="show" />
+                    <field name="group_lines" optional="show" />
                     <field name="partner_option" optional="show" />
                     <field name="partner_code_field" optional="show" />
                     <field

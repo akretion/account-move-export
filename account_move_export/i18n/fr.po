@@ -519,6 +519,39 @@ msgid "Float"
 msgstr "Nombre décimal"
 
 #. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__group_lines
+msgid "Group Journal Items"
+msgstr "Grouper les écritures comptables"
+
+#. module: account_move_export
+#: model:ir.model.fields,help:account_move_export.field_account_move_export_config__group_lines
+msgid "This option is incompatible with the export of analytic lines."
+msgstr "Cette option est incompatible avec l'export des lignes analytiques."
+
+#. module: account_move_export
+#: model:ir.model.fields,help:account_move_export.field_account_move_export_config__join_char
+msgid ""
+"Character(s) used when joining pieces of text. Used for field 'Taxes' and "
+"for journal entry labels when grouping is enabled."
+msgstr ""
+"Caractère(s) utilisé(s) lors de la concaténation de textes. Utilisé pour le "
+"champ 'Taxes' et pour les libellés d'écritures quand le groupement est activé."
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid ""
+"On configuration '%s', the option to group lines is enabled, so you cannot "
+"enable the analytic export. We remind you that the option to group lines is "
+"incompatible with the export of analytic lines."
+msgstr ""
+"Sur la configuration '%s', l'option de groupement des lignes est activée, "
+"vous ne pouvez donc pas activer l'export analytique. Nous vous rappelons que "
+"l'option de groupement des lignes est incompatible avec l'export des lignes "
+"analytiques."
+
+#. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__message_follower_ids
 msgid "Followers"
 msgstr "Abonnés"
@@ -703,6 +736,11 @@ msgstr "Écritures comptables"
 #, python-format
 msgid "Journal Name"
 msgstr "Nom du journal"
+
+#. module: account_move_export
+#: model:ir.model.fields,field_description:account_move_export.field_account_move_export_config__join_char
+msgid "Join Character(s)"
+msgstr "Caractère(s) de jointure"
 
 #. module: account_move_export
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__journal_ids
@@ -1022,6 +1060,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_move_export.field_account_move_export__target_move
 msgid "Target Journal Entries"
 msgstr "Écritures cibles"
+
+#. module: account_move_export
+#. odoo-python
+#: code:addons/account_move_export/models/account_move_export_config.py:0
+#, python-format
+msgid "Taxes"
+msgstr "Taxes"
 
 #. module: account_move_export
 #: model:ir.model.fields.selection,name:account_move_export.selection__account_move_export_config__lock__tax

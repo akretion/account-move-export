@@ -290,21 +290,24 @@ class AccountMoveExport(models.Model):
             domain.append(("state", "in", ("draft", "posted")))
         return domain
 
-    def _prepare_columns(self):
-        cols = []
+    def _prepare_columns(self, export_options):
         number = 0
+        field_dict = self.env["account.move.export.config.column"]._prepare_field_dict()
         for column in self.config_id.column_ids:
-            cols.append(
-                {
-                    "field": column.field,
-                    "field_type": column.field_type,
-                    "excel_width": column.excel_width,
-                    "header_label": column.header_label,
-                    "number": number,
-                }
-            )
+            col_vals = {
+                "field": column.field,
+                "field_type": column.field_type,
+                "excel_width": column.excel_width,
+                "header_label": column.header_label,
+                "number": number,
+            }
+            export_options["cols"].append(col_vals)
+            if col_vals["field_type"] in ("float", "company_currency"):
+                grouping = "sum"
+            else:
+                grouping = field_dict[column.field].get("grouping")
+            export_options["col2grouping"][column.field] = grouping
             number += 1
-        return cols
 
     def _csv_format_amount(self, amount, export_options):
         if not amount:
@@ -342,12 +345,16 @@ class AccountMoveExport(models.Model):
             "header_line": self.config_id.header_line,
             "partner_code_field": self.config_id.partner_code_field,
             "partner_option": self.config_id.partner_option,
+            "group_lines": self.config_id.group_lines,
+            "join_char": self.config_id.join_char,
             "company_currency": self.company_id.currency_id,
             "company_currency_id": self.company_id.currency_id.id,
             "amount_format": f"%.{self.company_id.currency_id.decimal_places}f",
             "analytic_option": self.config_id.analytic_option,
-            "cols": self._prepare_columns(),
+            "cols": [],
+            "col2grouping": {},
         }
+        self._prepare_columns(export_options)
         if self.config_id.analytic_option == "plan_filter":
             export_options[
                 "analytic_plan_ids"
@@ -459,6 +466,55 @@ class AccountMoveExport(models.Model):
         }
         return styles
 
+    def _prepare_moves(self, export_options):
+        self.ensure_one()
+        res = []  # one entry per move. One entry = list of mline_dict
+        for move in self.move_ids:
+            mline_dict_list = []
+            for mline in move.line_ids.filtered(
+                lambda x: x.display_type not in ("line_section", "line_note")
+            ):
+                mline_dict = mline._prepare_account_move_export_line(export_options)
+                mline_dict_list.append(mline_dict)
+            if export_options["group_lines"]:
+                key2mline_dict = {}
+                for mline_dict in mline_dict_list:
+                    key = mline_dict["group_key"]
+                    if key in key2mline_dict:
+                        for col_name, grouping in export_options[
+                            "col2grouping"
+                        ].items():
+                            if grouping == "sum":
+                                key2mline_dict[key][col_name] += mline_dict[col_name]
+                            elif grouping == "concat" and mline_dict[col_name]:
+                                if key2mline_dict[key][col_name]:
+                                    key2mline_dict[key][col_name] = export_options[
+                                        "join_char"
+                                    ].join(
+                                        [
+                                            key2mline_dict[key][col_name],
+                                            mline_dict[col_name],
+                                        ]
+                                    )
+                                else:
+                                    key2mline_dict[key][col_name] = mline_dict[col_name]
+                    else:
+                        key2mline_dict[key] = {"type": mline_dict["type"]}
+                        for col_name in export_options["col2grouping"].keys():
+                            key2mline_dict[key][col_name] = mline_dict[col_name]
+                mline_dict_list_unsorted = list(key2mline_dict.values())
+            else:
+                mline_dict_list_unsorted = mline_dict_list
+            if "account_code" in export_options["col2grouping"]:
+                mline_dict_list_sorted = sorted(
+                    mline_dict_list_unsorted,
+                    key=lambda to_sort: to_sort["account_code"],
+                )
+                res.append(mline_dict_list_sorted)
+            else:
+                res.append(mline_dict_list_unsorted)
+        return res
+
     def _generate_xlsx_generic(self):
         out_file = BytesIO()
         workbook = xlsxwriter.Workbook(out_file)
@@ -474,11 +530,8 @@ class AccountMoveExport(models.Model):
             for col in cols:
                 sheet.write(line, col["number"], col["header_label"], styles["header"])
             line += 1
-        for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
-                mline_dict = mline._prepare_account_move_export_line(export_options)
+        for move in self._prepare_moves(export_options):
+            for mline_dict in move:
                 for col in cols:
                     if col["field"] in mline_dict:
                         sheet.write(
@@ -488,26 +541,16 @@ class AccountMoveExport(models.Model):
                             styles[col["field_type"]],
                         )
                 line += 1
-                if export_options["analytic_option"] == "all":
-                    alines = mline.analytic_line_ids
-                elif export_options["analytic_option"] == "plan_filter":
-                    alines = mline.analytic_line_ids.filtered(
-                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
-                    )
-                else:
-                    alines = []
-                for aline in alines:
-                    aline_dict = aline._prepare_account_move_export_line(
-                        export_options
-                    )
-                    for col in cols:
-                        sheet.write(
-                            line,
-                            col["number"],
-                            aline_dict.get(col["field"], "") or "",
-                            styles[f"ana_{col['field_type']}"],
-                        )
-                    line += 1
+                if export_options["analytic_option"] != "no":
+                    for aline_dict in mline_dict.get("analytic_lines", []):
+                        for col in cols:
+                            sheet.write(
+                                line,
+                                col["number"],
+                                aline_dict.get(col["field"], "") or "",
+                                styles[f"ana_{col['field_type']}"],
+                            )
+                        line += 1
 
         workbook.close()
         out_file.seek(0)
@@ -525,24 +568,12 @@ class AccountMoveExport(models.Model):
         )
         if export_options["header_line"]:
             w.writeheader()
-        for move in self.move_ids:
-            for mline in move.line_ids.filtered(
-                lambda x: x.display_type not in ("line_section", "line_note")
-            ):
-                mline_dict = mline._prepare_account_move_export_line(export_options)
+        for move in self._prepare_moves(export_options):
+            for mline_dict in move:
                 row = self._csv_postprocess_line(mline_dict, export_options)
                 w.writerow(row)
-                if export_options["analytic_option"] == "all":
-                    alines = mline.analytic_line_ids
-                elif export_options["analytic_option"] == "plan_filter":
-                    alines = mline.analytic_line_ids.filtered(
-                        lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
-                    )
-                if export_options["analytic_option"] in ("all", "plan_filter"):
-                    for aline in alines:
-                        aline_dict = aline._prepare_account_move_export_line(
-                            export_options
-                        )
+                if export_options["analytic_option"] != "no":
+                    for aline_dict in mline_dict.get("analytic_lines", []):
                         row = self._csv_postprocess_line(aline_dict, export_options)
                         w.writerow(row)
         return self._csv_encode(tmpfile, export_options)

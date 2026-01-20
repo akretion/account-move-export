@@ -17,7 +17,8 @@
     <field name="auto_delete" eval="False" />
     <field
             name="email_from"
-        >{{ user.email_formatted or object.company_id.email_formatted }}</field>
+            >{{ user.email_formatted or object.company_id.email_formatted }}</field>
+    <field name="use_default_to" eval="False"/>
     <field
             name="partner_to"
         >{{ ', '.join([str(p.id) for p in object.config_id.send_to_partner_ids]) }}</field>

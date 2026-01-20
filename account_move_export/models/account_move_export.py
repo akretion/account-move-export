@@ -803,7 +803,6 @@ class AccountMoveExport(models.Model):
         }
         return action
 
-    @api.returns("mail.message", lambda value: value.id)
     def message_post(self, **kwargs):
         if self.env.context.get("mark_export_as_sent"):
             self.write({"sent": True})

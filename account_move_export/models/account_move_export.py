@@ -66,7 +66,7 @@ class AccountMoveExport(models.Model):
     date_range_id = fields.Many2one(
         "date.range",
         check_company=True,
-        domain="[('company_ids', 'in', [company_id, False])]",
+        domain="[('company_id', 'in', (company_id, False))]",
     )
     date_start = fields.Date(
         compute="_compute_dates",

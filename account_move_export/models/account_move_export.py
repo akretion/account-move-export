@@ -266,7 +266,8 @@ class AccountMoveExport(models.Model):
     def done2draft(self):
         self.ensure_one()
         assert self.state == "done"
-        self.attachment_id.unlink()
+        # sudo() added as workaround for issue #18
+        self.attachment_id.sudo().unlink()
         vals = {"state": "draft"}
         if self.filter_type == "custom":
             vals["move_ids"] = [Command.unlink(move.id) for move in self.move_ids]

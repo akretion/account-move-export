@@ -49,6 +49,9 @@ class AccountMoveLine(models.Model):
             "account_name": self.account_id.name,
             "partner_code": partner_code,
             "partner_name": partner_name,
+            "tax_names": self.tax_ids
+            and export_options["join_char"].join([t.name for t in self.tax_ids])
+            or None,
             "item_label": self.name or None,
             "debit": export_options["company_currency"].round(self.debit),
             "credit": export_options["company_currency"].round(self.credit),
@@ -66,4 +69,32 @@ class AccountMoveLine(models.Model):
                     "end_date": self.end_date or None,
                 }
             )
+        if not export_options["group_lines"] and export_options["analytic_option"] != "no":
+            res["analytic_lines"] = []
+            if export_options["analytic_option"] == "all":
+                alines = self.analytic_line_ids
+            elif export_options["analytic_option"] == "plan_filter":
+                alines = self.analytic_line_ids.filtered(
+                    lambda x: x.plan_id.id in export_options["analytic_plan_ids"]
+                )
+            else:
+                alines = []
+            for aline in alines:
+                aline_dict = aline._prepare_account_move_export_line(export_options)
+                if aline_dict:
+                    res["analytic_lines"].append(aline_dict)
+        if export_options["group_lines"]:
+            group_key2value = {"account_code": res["account_code"]}
+            for col_name, grouping in export_options["col2grouping"].items():
+                if grouping == "key":
+                    group_key2value[col_name] = str(res[col_name])
+                elif col_name in ("partner_code", "partner_name"):
+                    group_key2value["partner_id"] = str(self.partner_id.id or None)
+                elif col_name == "origin_currency_amount":
+                    # anyway, if 'origin_currency_amount' is in cols,
+                    # 'origin_currency_code' should be in cols too, but just in case
+                    group_key2value["origin_currency_code"] = res[
+                        "origin_currency_code"
+                    ]
+            res["group_key"] = "-".join(list(group_key2value.values()))
         return res

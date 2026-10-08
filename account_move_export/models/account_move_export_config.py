@@ -139,6 +139,10 @@ class AccountMoveExportConfig(models.Model):
         default=".csv",
         required=True,
     )
+    clean_carriage_return= fields.Boolean(
+        default=False,
+        help="Remove carriage return characters from the exported file. Needeed to import in specific software.",
+    )
     xlsx_font_size = fields.Integer(default=10, string="Font Size")
     xlsx_analytic_bg_color = fields.Char(
         string="Analytic Background Color",

@@ -278,6 +278,12 @@ class AccountMoveExport(models.Model):
             domain.append(("state", "in", ("draft", "posted")))
         return domain
 
+    def _clean_value(self, value, export_options):
+        """Clean carriage returns and line feeds if option is active."""
+        if export_options.get("clean_carriage_return") and isinstance(value, str):
+            return value.replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+        return value
+
     def _csv_format_amount(self, amount, export_options):
         if not amount:
             amount = 0.0
@@ -306,7 +312,7 @@ class AccountMoveExport(models.Model):
                 elif col["field_type"] in ("company_currency", "float"):
                     row[header] = self._csv_format_amount(ldict[field], export_options)
                 else:
-                    row[header] = ldict[field]
+                    row[header] = self._clean_value(ldict[field], export_options)
         return row
 
     def _prepare_columns(self, export_options):
@@ -370,6 +376,7 @@ class AccountMoveExport(models.Model):
             "cols": [],
             "col2grouping": {},
             "analytic_plan2field": {},
+            "clean_carriage_return": config.clean_carriage_return,
         }
         self._prepare_columns(export_options)
         if config.partner_option == "accounts":
@@ -544,10 +551,11 @@ class AccountMoveExport(models.Model):
             for mline_dict in move:
                 for col in cols:
                     if col["field"] in mline_dict and not col.get("analytic_only"):
+                        val = self._clean_value(mline_dict[col["field"]], export_options)
                         sheet.write(
                             line,
                             col["number"],
-                            mline_dict[col["field"]],
+                            val,
                             styles[col["field_type"]],
                         )
                 line += 1
@@ -558,10 +566,13 @@ class AccountMoveExport(models.Model):
                                 field_key = f"{col['field']},{col['analytic_plan_id']}"
                             else:
                                 field_key = col["field"]
+                            val = self._clean_value(
+                                aline_dict.get(field_key, "") or "", export_options
+                            )
                             sheet.write(
                                 line,
                                 col["number"],
-                                aline_dict.get(field_key, "") or "",
+                                val,
                                 styles[f"ana_{col['field_type']}"],
                             )
                         line += 1
